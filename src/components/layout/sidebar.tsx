@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useTheme } from '@/components/theme-provider'
 import {
   LayoutDashboard,
   FileText,
@@ -14,6 +15,9 @@ import {
   Settings,
   HelpCircle,
   Scale,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react'
 
 const navigation = [
@@ -59,6 +63,7 @@ const secondaryNavigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
 
   return (
     <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-background">
@@ -122,7 +127,39 @@ export function Sidebar() {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-4">
+        {/* Theme Switcher */}
+        <div className="flex items-center justify-between gap-1 p-1 rounded-lg bg-muted">
+          <Button
+            variant={theme === 'light' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setTheme('light')}
+            className="flex-1 h-8"
+            title="Jasny motyw"
+          >
+            <Sun className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={theme === 'dark' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setTheme('dark')}
+            className="flex-1 h-8"
+            title="Ciemny motyw"
+          >
+            <Moon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={theme === 'system' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setTheme('system')}
+            className="flex-1 h-8"
+            title="Systemowy motyw"
+          >
+            <Monitor className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Help card */}
         <div className="p-4 rounded-lg bg-primary/5">
           <p className="text-sm font-medium">Potrzebujesz pomocy?</p>
           <p className="text-xs text-muted-foreground mt-1">
