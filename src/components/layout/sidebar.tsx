@@ -18,7 +18,7 @@ import {
 
 const navigation = [
   {
-    name: 'Dashboard',
+    name: 'Panel',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
@@ -69,7 +69,7 @@ export function Sidebar() {
         </div>
         <div className="flex flex-col">
           <span className="font-semibold text-lg">Ścieżka Prawa</span>
-          <span className="text-xs text-muted-foreground">Legislative Tracker</span>
+          <span className="text-xs text-muted-foreground">Śledzenie legislacji</span>
         </div>
       </div>
 

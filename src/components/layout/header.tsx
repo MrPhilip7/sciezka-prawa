@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,9 +33,18 @@ interface HeaderProps {
 
 export function Header({ user, onMenuClick }: HeaderProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
 
   const getPageTitle = () => {
-    if (pathname.startsWith('/dashboard')) return 'Dashboard'
+    if (pathname.startsWith('/dashboard')) return 'Panel'
     if (pathname.startsWith('/bills')) return 'Ustawy'
     if (pathname.startsWith('/search')) return 'Wyszukiwarka'
     if (pathname.startsWith('/alerts')) return 'Powiadomienia'
@@ -82,16 +92,18 @@ export function Header({ user, onMenuClick }: HeaderProps) {
         </div>
 
         {/* Search bar */}
-        <div className="flex-1 flex justify-center max-w-xl mx-auto">
+        <form onSubmit={handleSearch} className="flex-1 flex justify-center max-w-xl mx-auto">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Szukaj ustaw..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 bg-muted/50"
             />
           </div>
-        </div>
+        </form>
 
         {/* Right side actions */}
         <div className="flex items-center gap-2">

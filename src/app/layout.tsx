@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ścieżka Prawa - Polish Legislative Tracker",
+  title: "Ścieżka Prawa - Śledzenie legislacji",
   description: "Śledź proces legislacyjny w Polsce. Monitoruj projekty ustaw, otrzymuj powiadomienia i bądź świadomym obywatelem.",
   keywords: ["legislacja", "sejm", "ustawy", "prawo", "polska", "tracker"],
 };

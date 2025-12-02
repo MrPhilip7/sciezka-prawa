@@ -258,7 +258,7 @@ export default function HomePage() {
               <ul className="space-y-2 text-muted-foreground">
                 <li>
                   <Link href="/dashboard" className="hover:text-foreground transition-colors">
-                    Dashboard
+                    Panel
                   </Link>
                 </li>
                 <li>

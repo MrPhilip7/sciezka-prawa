@@ -26,6 +26,11 @@ export type Database = {
           term: number | null
           tags: string[] | null
           submission_year: number | null
+          is_hidden: boolean
+          hidden_by: string | null
+          hidden_at: string | null
+          hidden_reason: string | null
+          last_edited_by: string | null
           created_at: string
           updated_at: string
         }
@@ -196,6 +201,9 @@ export type Database = {
           email: string | null
           full_name: string | null
           avatar_url: string | null
+          role: 'user' | 'moderator' | 'admin' | 'super_admin'
+          is_active: boolean
+          last_login: string | null
           created_at: string
           updated_at: string
         }
@@ -204,6 +212,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           avatar_url?: string | null
+          role?: 'user' | 'moderator' | 'admin' | 'super_admin'
+          is_active?: boolean
+          last_login?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -212,10 +223,92 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           avatar_url?: string | null
+          role?: 'user' | 'moderator' | 'admin' | 'super_admin'
+          is_active?: boolean
+          last_login?: string | null
           created_at?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      admin_logs: {
+        Row: {
+          id: string
+          admin_id: string
+          action: string
+          target_type: string
+          target_id: string | null
+          details: Json | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_id: string
+          action: string
+          target_type: string
+          target_id?: string | null
+          details?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_id?: string
+          action?: string
+          target_type?: string
+          target_id?: string | null
+          details?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_logs_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      system_settings: {
+        Row: {
+          id: string
+          key: string
+          value: Json
+          description: string | null
+          updated_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          value: Json
+          description?: string | null
+          updated_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          value?: Json
+          description?: string | null
+          updated_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
@@ -235,9 +328,12 @@ export type InsertTables<T extends keyof Database['public']['Tables']> = Databas
 export type UpdateTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
 
 export type BillStatus = Database['public']['Enums']['bill_status']
+export type UserRole = 'user' | 'moderator' | 'admin' | 'super_admin'
 
 export type Bill = Tables<'bills'>
 export type BillEvent = Tables<'bill_events'>
 export type UserAlert = Tables<'user_alerts'>
 export type SavedSearch = Tables<'saved_searches'>
 export type Profile = Tables<'profiles'>
+export type AdminLog = Tables<'admin_logs'>
+export type SystemSetting = Tables<'system_settings'>

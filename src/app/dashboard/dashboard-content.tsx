@@ -156,7 +156,7 @@ export function DashboardContent({ recentBills, alertsCount, billsByStatus }: Da
                               <div className="min-w-0">
                                 <p className="font-medium truncate">{bill.title}</p>
                                 <p className="text-sm text-muted-foreground truncate">
-                                  {bill.sejm_id} • {bill.ministry || 'Brak ministerstwa'}
+                                  {bill.sejm_id}{bill.ministry && ` • ${bill.ministry}`}
                                 </p>
                               </div>
                               <Badge className={status.color} variant="secondary">
