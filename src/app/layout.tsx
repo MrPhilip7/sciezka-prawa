@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AIAssistant } from "@/components/ai-assistant";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <ThemeProvider defaultTheme="system" storageKey="sciezka-prawa-theme">
           {children}
+          <AIAssistant />
           <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>
