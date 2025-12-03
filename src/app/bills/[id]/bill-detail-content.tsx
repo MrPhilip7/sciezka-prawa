@@ -48,15 +48,86 @@ const statusConfig: Record<string, { label: string; color: string; step: number 
 }
 
 const legislativeSteps = [
-  { key: 'submitted', label: 'Złożenie projektu' },
-  { key: 'first_reading', label: 'I Czytanie' },
-  { key: 'committee', label: 'Prace w komisji' },
-  { key: 'second_reading', label: 'II Czytanie' },
-  { key: 'third_reading', label: 'III Czytanie' },
-  { key: 'senate', label: 'Senat' },
-  { key: 'presidential', label: 'Prezydent' },
-  { key: 'published', label: 'Publikacja' },
+  { key: 'submitted', label: 'Złożenie projektu', eventTypes: ['wpłynął', 'złożenie', 'projekt wpłynął', 'druk nr', 'submitted'] },
+  { key: 'first_reading', label: 'I Czytanie', eventTypes: ['i czytanie', 'pierwsze czytanie', 'skierowano do i czytania', 'first_reading', 'czytania w komisj', 'czytanie w komisj'] },
+  { key: 'committee', label: 'Prace w komisji', eventTypes: ['komisj', 'skierowano do komisji', 'prace w komisji', 'sprawozdanie komisji', 'committee', 'posiedzenie komisji'] },
+  { key: 'second_reading', label: 'II Czytanie', eventTypes: ['ii czytanie', 'drugie czytanie', 'second_reading'] },
+  { key: 'third_reading', label: 'III Czytanie', eventTypes: ['iii czytanie', 'trzecie czytanie', 'głosowanie', 'uchwalenie', 'third_reading'] },
+  { key: 'senate', label: 'Senat', eventTypes: ['przekazano do senatu', 'senat', 'stanowisko senatu', 'senate'] },
+  { key: 'presidential', label: 'Prezydent', eventTypes: ['przekazano prezydentowi', 'prezydent', 'podpis prezydenta', 'presidential'] },
+  { key: 'published', label: 'Publikacja', eventTypes: ['publikacja', 'dziennik ustaw', 'ogłoszono', 'opublikowano', 'published'] },
 ]
+
+// Funkcja do określenia ukończonych etapów na podstawie wydarzeń
+function getCompletedSteps(events: BillEvent[], currentStatus: string): Set<string> {
+  const completed = new Set<string>()
+  
+  // Dodaj etapy na podstawie wydarzeń
+  events.forEach(event => {
+    const eventTypeLower = event.event_type.toLowerCase()
+    const descriptionLower = (event.description || '').toLowerCase()
+    const fullText = `${eventTypeLower} ${descriptionLower}`
+    
+    legislativeSteps.forEach(step => {
+      if (step.eventTypes.some(et => fullText.includes(et.toLowerCase()))) {
+        completed.add(step.key)
+      }
+    })
+  })
+  
+  // Dodaj etapy na podstawie obecnego statusu (jako fallback)
+  const statusStep = statusConfig[currentStatus]?.step || 0
+  if (statusStep > 0) {
+    legislativeSteps.forEach((step, index) => {
+      if (index < statusStep) {
+        completed.add(step.key)
+      }
+    })
+  }
+  
+  return completed
+}
+
+// Funkcja do określenia aktualnego etapu na podstawie wydarzeń
+function getCurrentStepFromEvents(events: BillEvent[], currentStatus: string): number {
+  let maxStepIndex = -1
+  
+  events.forEach(event => {
+    const eventTypeLower = event.event_type.toLowerCase()
+    const descriptionLower = (event.description || '').toLowerCase()
+    const fullText = `${eventTypeLower} ${descriptionLower}`
+    
+    legislativeSteps.forEach((step, index) => {
+      if (step.eventTypes.some(et => fullText.includes(et.toLowerCase()))) {
+        if (index > maxStepIndex) {
+          maxStepIndex = index
+        }
+      }
+    })
+  })
+  
+  // Fallback do statusu
+  if (maxStepIndex === -1) {
+    const statusStep = statusConfig[currentStatus]?.step || 0
+    maxStepIndex = statusStep - 1 // step w statusConfig jest 1-based
+  }
+  
+  return maxStepIndex
+}
+
+// Funkcja do znalezienia daty dla danego etapu
+function getStepDate(events: BillEvent[], step: typeof legislativeSteps[0]): string | null {
+  for (const event of events) {
+    const eventTypeLower = event.event_type.toLowerCase()
+    const descriptionLower = (event.description || '').toLowerCase()
+    const fullText = `${eventTypeLower} ${descriptionLower}`
+    
+    if (step.eventTypes.some(et => fullText.includes(et.toLowerCase()))) {
+      return event.event_date
+    }
+  }
+  return null
+}
 
 export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isLoggedIn }: BillDetailContentProps) {
   const router = useRouter()
@@ -64,7 +135,10 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
   const [isTogglingAlert, setIsTogglingAlert] = useState(false)
   
   const status = statusConfig[bill.status] || statusConfig.draft
-  const currentStep = status.step
+  const completedSteps = getCompletedSteps(events, bill.status)
+  
+  // Znajdź aktualny etap na podstawie wydarzeń
+  const currentStepIndex = getCurrentStepFromEvents(events, bill.status)
 
   const toggleAlert = async () => {
     if (!isLoggedIn) {
@@ -193,7 +267,10 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
           <CardHeader>
             <CardTitle>Postęp legislacyjny</CardTitle>
             <CardDescription>
-              Aktualna pozycja projektu w procesie legislacyjnym
+              {events.length > 0 
+                ? `Na podstawie ${events.length} zarejestrowanych wydarzeń`
+                : 'Aktualna pozycja projektu w procesie legislacyjnym'
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -202,14 +279,16 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
               <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-muted" />
               <div 
                 className="absolute left-4 top-4 w-0.5 bg-primary transition-all duration-500"
-                style={{ height: `${Math.min((currentStep / (legislativeSteps.length - 1)) * 100, 100)}%` }}
+                style={{ height: `${Math.min((currentStepIndex / (legislativeSteps.length - 1)) * 100, 100)}%` }}
               />
 
               {/* Steps */}
               <div className="space-y-6">
                 {legislativeSteps.map((step, index) => {
-                  const isCompleted = currentStep > index
-                  const isCurrent = currentStep === index
+                  // Etap jest ukończony jeśli jest przed aktualnym lub ma wydarzenie
+                  const isCompleted = index < currentStepIndex || (index === currentStepIndex && completedSteps.has(step.key))
+                  const isCurrent = index === currentStepIndex
+                  const stepDate = getStepDate(events, step)
                   
                   return (
                     <div key={step.key} className="relative flex items-center gap-4 pl-8">
@@ -218,14 +297,24 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
                         ${isCompleted ? 'bg-primary border-primary' : isCurrent ? 'bg-background border-primary' : 'bg-background border-muted'}
                       `}>
                         {isCompleted && <CheckCircle2 className="h-3 w-3 text-primary-foreground" />}
-                        {isCurrent && <Circle className="h-2 w-2 fill-primary text-primary" />}
+                        {isCurrent && !isCompleted && <Circle className="h-2 w-2 fill-primary text-primary" />}
                       </div>
-                      <div className={`flex-1 ${isCurrent ? 'font-medium' : ''} ${!isCompleted && !isCurrent ? 'text-muted-foreground' : ''}`}>
-                        {step.label}
+                      <div className={`flex-1 ${isCurrent || isCompleted ? 'font-medium' : ''} ${!isCompleted && !isCurrent ? 'text-muted-foreground' : ''}`}>
+                        <span>{step.label}</span>
+                        {stepDate && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({format(new Date(stepDate), 'd MMM yyyy', { locale: pl })})
+                          </span>
+                        )}
                       </div>
-                      {isCurrent && (
-                        <Badge variant="outline" className="text-xs">
-                          Aktualny etap
+                      {isCurrent && !isCompleted && (
+                        <Badge variant="outline" className="text-xs bg-primary/10">
+                          W trakcie
+                        </Badge>
+                      )}
+                      {isCompleted && (
+                        <Badge variant="secondary" className="text-xs">
+                          ✓
                         </Badge>
                       )}
                     </div>
@@ -233,6 +322,12 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
                 })}
               </div>
             </div>
+            
+            {events.length === 0 && (
+              <p className="mt-4 text-sm text-muted-foreground text-center">
+                ⚠️ Brak szczegółowych danych o przebiegu - pokazano szacowany stan na podstawie statusu
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -293,6 +388,34 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
                     })}
                   </dd>
                 </div>
+                {bill.submitter_type && (
+                  <div>
+                    <dt className="text-sm font-medium text-muted-foreground">Typ wnioskodawcy</dt>
+                    <dd className="text-lg font-semibold capitalize">{bill.submitter_type}</dd>
+                  </div>
+                )}
+                {bill.category && (
+                  <div>
+                    <dt className="text-sm font-medium text-muted-foreground">Kategoria</dt>
+                    <dd className="text-lg font-semibold capitalize">{bill.category.replace('_', ' ')}</dd>
+                  </div>
+                )}
+                {bill.term && (
+                  <div>
+                    <dt className="text-sm font-medium text-muted-foreground">Kadencja Sejmu</dt>
+                    <dd className="text-lg font-semibold">{bill.term}. kadencja</dd>
+                  </div>
+                )}
+                {bill.tags && bill.tags.length > 0 && (
+                  <div className="md:col-span-2">
+                    <dt className="text-sm font-medium text-muted-foreground mb-2">Tagi</dt>
+                    <dd className="flex flex-wrap gap-2">
+                      {bill.tags.map((tag, i) => (
+                        <Badge key={i} variant="secondary">{tag}</Badge>
+                      ))}
+                    </dd>
+                  </div>
+                )}
               </dl>
             </CardContent>
           </Card>

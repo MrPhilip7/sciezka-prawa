@@ -1,10 +1,22 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { fetchProcessWithStages, flattenStages, getStatusFromStages, type SejmProcessStage } from '@/lib/api/sejm'
 import type { BillStatus } from '@/types/supabase'
 
 const SEJM_API_BASE = 'https://api.sejm.gov.pl'
 const TERM = 10
 const PAGE_SIZE = 100 // Max items per request
+
+interface SejmProcessStageInternal {
+  stageName: string
+  date: string
+  children?: SejmProcessStageInternal[]
+  stageType?: string
+  committeeCode?: string
+  printNumber?: string
+  comment?: string
+  decision?: string
+}
 
 interface SejmProcess {
   number: string
@@ -19,6 +31,7 @@ interface SejmProcess {
   legislativeCommittee?: string
   web?: string
   UE?: string
+  stages?: SejmProcessStageInternal[]
 }
 
 interface SejmPrint {
@@ -260,6 +273,25 @@ async function fetchAllProcesses(): Promise<SejmProcess[]> {
   return allProcesses
 }
 
+// Fetch single process with full details (including stages)
+async function fetchProcessDetails(processNumber: string): Promise<SejmProcess | null> {
+  try {
+    const response = await fetch(
+      `${SEJM_API_BASE}/sejm/term${TERM}/processes/${processNumber}`,
+      { headers: { 'Accept': 'application/json' } }
+    )
+
+    if (!response.ok) {
+      return null
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error(`Error fetching process ${processNumber}:`, error)
+    return null
+  }
+}
+
 export async function POST() {
   try {
     const supabase = await createClient()
@@ -299,15 +331,28 @@ export async function POST() {
 
     let inserted = 0
     let updated = 0
+    let eventsInserted = 0
     const errors: string[] = []
+    let processedCount = 0
 
     // Process each legislative process
     for (const process of processes) {
       try {
+        processedCount++
+        if (processedCount % 50 === 0) {
+          console.log(`Processing ${processedCount}/${processes.length}...`)
+        }
+        
         const sejmId = `${TERM}-${process.number}`
         const externalUrl = `https://www.sejm.gov.pl/Sejm${TERM}.nsf/PrzebiegProc.xsp?nr=${process.number}`
         const submissionDate = process.documentDate || process.processStartDate || null
         const submissionYear = submissionDate ? new Date(submissionDate).getFullYear() : null
+        
+        // Pobierz pełne dane procesu (w tym stages) - endpoint listy nie zwraca stages
+        const fullProcess = await fetchProcessDetails(process.number)
+        const stages = fullProcess?.stages || []
+        const stageEvents = flattenStages(stages as SejmProcessStage[])
+        const statusFromStages = stages.length > 0 ? getStatusFromStages(stages as SejmProcessStage[]) : mapStatus(process, prints)
         
         // Check if bill already exists
         const { data: existing } = await supabase
@@ -320,7 +365,7 @@ export async function POST() {
           sejm_id: sejmId,
           title: process.title,
           description: process.description || process.principlesOfLaw || null,
-          status: mapStatus(process, prints),
+          status: statusFromStages as BillStatus,
           ministry: extractMinistry(process.createdBy),
           submission_date: submissionDate,
           external_url: externalUrl,
@@ -330,7 +375,10 @@ export async function POST() {
           term: TERM,
           tags: extractTags(process.title),
           submission_year: submissionYear,
+          last_updated: new Date().toISOString(),
         }
+
+        let billId: string
 
         if (existing) {
           // Update existing bill
@@ -340,15 +388,46 @@ export async function POST() {
             .eq('id', existing.id)
 
           if (error) throw error
+          billId = existing.id
           updated++
         } else {
           // Insert new bill
-          const { error } = await supabase
+          const { data: newBill, error } = await supabase
             .from('bills')
             .insert(billData)
+            .select('id')
+            .single()
 
           if (error) throw error
+          billId = newBill.id
           inserted++
+        }
+
+        // Sync events for this bill
+        if (stageEvents.length > 0 && billId) {
+          // Delete existing events and re-insert (to keep in sync)
+          await supabase
+            .from('bill_events')
+            .delete()
+            .eq('bill_id', billId)
+
+          // Insert new events
+          const eventsToInsert = stageEvents.map(event => ({
+            bill_id: billId,
+            event_type: event.event_type,
+            event_date: event.event_date,
+            description: event.description,
+          }))
+
+          const { error: eventsError } = await supabase
+            .from('bill_events')
+            .insert(eventsToInsert)
+
+          if (eventsError) {
+            console.error(`Error inserting events for ${process.number}:`, eventsError)
+          } else {
+            eventsInserted += eventsToInsert.length
+          }
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
@@ -363,6 +442,7 @@ export async function POST() {
       total: processes.length,
       inserted,
       updated,
+      eventsInserted,
       errors: errors.length > 0 ? errors : undefined,
     })
 
