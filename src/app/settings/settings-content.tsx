@@ -1,15 +1,20 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { Bell, Moon, Shield, Sun, Monitor } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Bell, Moon, Shield, Sun, Monitor, Accessibility, Settings } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
+import { AccessibilityPanel } from '@/components/accessibility'
 
 export function SettingsContent() {
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const searchParams = useSearchParams()
+  const defaultTab = searchParams.get('tab') || 'general'
 
   const isDarkMode = resolvedTheme === 'dark'
 
@@ -23,7 +28,20 @@ export function SettingsContent() {
         </p>
       </div>
 
-      <div className="grid gap-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+          <TabsTrigger value="general" className="gap-2">
+            <Settings className="h-4 w-4" />
+            Ogólne
+          </TabsTrigger>
+          <TabsTrigger value="accessibility" className="gap-2">
+            <Accessibility className="h-4 w-4" />
+            Dostępność
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Zakładka: Ogólne */}
+        <TabsContent value="general" className="space-y-6">
         {/* Notifications Settings */}
         <Card>
           <CardHeader>
@@ -175,7 +193,13 @@ export function SettingsContent() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </TabsContent>
+
+        {/* Zakładka: Dostępność */}
+        <TabsContent value="accessibility">
+          <AccessibilityPanel />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

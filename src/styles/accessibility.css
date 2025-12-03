@@ -1,0 +1,509 @@
+/* ========================================
+   UŁATWIENIA DOSTĘPU - ACCESSIBILITY CSS
+   ======================================== */
+
+/* ======================
+   OCHRONA ELEMENTÓW FIXED
+   ====================== */
+/* Filter na body psuje position:fixed, dlatego nie używamy go na body */
+
+/* ======================
+   TRYBY KONTRASTU
+   ====================== */
+
+/* Odwrócone kolory - używamy tylko zmiennych CSS, nie filtra na całej stronie */
+.contrast-inverted {
+  --background: 0 0% 100% !important;
+  --foreground: 0 0% 0% !important;
+  --card: 0 0% 95% !important;
+  --card-foreground: 0 0% 0% !important;
+  --popover: 0 0% 95% !important;
+  --popover-foreground: 0 0% 0% !important;
+  --primary: 200 100% 50% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 0 0% 85% !important;
+  --secondary-foreground: 0 0% 0% !important;
+  --muted: 0 0% 88% !important;
+  --muted-foreground: 0 0% 25% !important;
+  --accent: 200 100% 50% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --destructive: 180 100% 40% !important;
+  --destructive-foreground: 0 0% 100% !important;
+  --border: 0 0% 50% !important;
+  --input: 0 0% 90% !important;
+  --ring: 200 100% 50% !important;
+  background-color: hsl(0 0% 10%) !important;
+  color: hsl(0 0% 90%) !important;
+}
+
+/* Odwracamy tylko obrazki w trybie odwróconych kolorów */
+.contrast-inverted img,
+.contrast-inverted video,
+.contrast-inverted picture {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Wysoki kontrast - tryb ciemny */
+.contrast-high-dark {
+  color-scheme: dark !important;
+  --background: 0 0% 0% !important;
+  --foreground: 0 0% 100% !important;
+  --card: 0 0% 5% !important;
+  --card-foreground: 0 0% 100% !important;
+  --popover: 0 0% 5% !important;
+  --popover-foreground: 0 0% 100% !important;
+  --primary: 60 100% 50% !important;
+  --primary-foreground: 0 0% 0% !important;
+  --secondary: 0 0% 15% !important;
+  --secondary-foreground: 0 0% 100% !important;
+  --muted: 0 0% 12% !important;
+  --muted-foreground: 0 0% 85% !important;
+  --accent: 60 100% 50% !important;
+  --accent-foreground: 0 0% 0% !important;
+  --destructive: 0 100% 60% !important;
+  --destructive-foreground: 0 0% 100% !important;
+  --border: 0 0% 50% !important;
+  --input: 0 0% 15% !important;
+  --ring: 60 100% 50% !important;
+  background-color: hsl(0 0% 0%) !important;
+  color: hsl(0 0% 100%) !important;
+}
+
+.contrast-high-dark a:not([class*="btn"]),
+.contrast-high-dark button {
+  outline: 2px solid transparent;
+}
+
+.contrast-high-dark a:focus,
+.contrast-high-dark button:focus {
+  outline: 3px solid hsl(60 100% 50%);
+  outline-offset: 2px;
+}
+
+/* Wysoki kontrast - tryb jasny */
+.contrast-high-light {
+  color-scheme: light !important;
+  --background: 0 0% 100% !important;
+  --foreground: 0 0% 0% !important;
+  --card: 0 0% 98% !important;
+  --card-foreground: 0 0% 0% !important;
+  --popover: 0 0% 98% !important;
+  --popover-foreground: 0 0% 0% !important;
+  --primary: 220 100% 30% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --secondary: 0 0% 90% !important;
+  --secondary-foreground: 0 0% 0% !important;
+  --muted: 0 0% 92% !important;
+  --muted-foreground: 0 0% 20% !important;
+  --accent: 220 100% 30% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --destructive: 0 100% 40% !important;
+  --destructive-foreground: 0 0% 100% !important;
+  --border: 0 0% 0% !important;
+  --input: 0 0% 95% !important;
+  --ring: 220 100% 30% !important;
+  background-color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 0%) !important;
+}
+
+.contrast-high-light a:not([class*="btn"]),
+.contrast-high-light button {
+  outline: 2px solid transparent;
+}
+
+.contrast-high-light a:focus,
+.contrast-high-light button:focus {
+  outline: 3px solid hsl(220 100% 30%);
+  outline-offset: 2px;
+}
+
+.contrast-high-light .text-muted-foreground {
+  color: hsl(0 0% 30%) !important;
+}
+
+/* ======================
+   PANEL UŁATWIEŃ DOSTĘPU
+   - Zawsze czytelny niezależnie od trybu
+   ====================== */
+
+/* Przycisk panelu - zawsze ciemny */
+.accessibility-panel-button {
+  filter: none !important;
+}
+
+/* Panel - style dla trybów wysokiego kontrastu */
+.contrast-high-dark .accessibility-panel,
+.contrast-high-light .accessibility-panel,
+.contrast-inverted .accessibility-panel {
+  background-color: #1f1f1f !important;
+  color: #ffffff !important;
+  border-color: #444444 !important;
+  filter: none !important;
+}
+
+.contrast-high-dark .accessibility-panel *,
+.contrast-high-light .accessibility-panel *,
+.contrast-inverted .accessibility-panel * {
+  filter: none !important;
+  color: inherit !important;
+}
+
+.contrast-inverted .accessibility-panel {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+/* Suwaki (Switch) w panelu - zawsze widoczne */
+.contrast-high-dark .accessibility-panel [data-slot="switch"],
+.contrast-high-light .accessibility-panel [data-slot="switch"],
+.contrast-inverted .accessibility-panel [data-slot="switch"] {
+  background-color: #4a4a4a !important;
+  border: 2px solid #666666 !important;
+}
+
+.contrast-high-dark .accessibility-panel [data-slot="switch"][data-state="checked"],
+.contrast-high-light .accessibility-panel [data-slot="switch"][data-state="checked"],
+.contrast-inverted .accessibility-panel [data-slot="switch"][data-state="checked"] {
+  background-color: #3b82f6 !important;
+  border-color: #60a5fa !important;
+}
+
+.contrast-high-dark .accessibility-panel [data-slot="switch-thumb"],
+.contrast-high-light .accessibility-panel [data-slot="switch-thumb"],
+.contrast-inverted .accessibility-panel [data-slot="switch-thumb"] {
+  background-color: #ffffff !important;
+}
+
+/* Select (dropdown) w panelu - zawsze widoczny */
+.contrast-high-dark .accessibility-panel button[role="combobox"],
+.contrast-high-light .accessibility-panel button[role="combobox"],
+.contrast-inverted .accessibility-panel button[role="combobox"] {
+  background-color: #2d2d2d !important;
+  border: 2px solid #666666 !important;
+  color: #ffffff !important;
+}
+
+.contrast-high-dark .accessibility-panel button[role="combobox"]:hover,
+.contrast-high-light .accessibility-panel button[role="combobox"]:hover,
+.contrast-inverted .accessibility-panel button[role="combobox"]:hover {
+  background-color: #3d3d3d !important;
+  border-color: #888888 !important;
+}
+
+/* Ikony w panelu */
+.contrast-high-dark .accessibility-panel svg,
+.contrast-high-light .accessibility-panel svg,
+.contrast-inverted .accessibility-panel svg {
+  color: #a0a0a0 !important;
+}
+
+/* Separator w panelu */
+.contrast-high-dark .accessibility-panel [data-slot="separator"],
+.contrast-high-light .accessibility-panel [data-slot="separator"],
+.contrast-inverted .accessibility-panel [data-slot="separator"],
+.contrast-high-dark .accessibility-panel hr,
+.contrast-high-light .accessibility-panel hr,
+.contrast-inverted .accessibility-panel hr {
+  background-color: #444444 !important;
+  border-color: #444444 !important;
+}
+
+/* Link do pełnych ustawień */
+.contrast-high-dark .accessibility-panel a,
+.contrast-high-light .accessibility-panel a,
+.contrast-inverted .accessibility-panel a {
+  color: #60a5fa !important;
+  border-color: #444444 !important;
+}
+
+.contrast-high-dark .accessibility-panel a:hover,
+.contrast-high-light .accessibility-panel a:hover,
+.contrast-inverted .accessibility-panel a:hover {
+  background-color: #2d2d2d !important;
+}
+
+/* Dropdown menu (SelectContent) - renderowane w portalu */
+.contrast-high-dark [data-radix-popper-content-wrapper],
+.contrast-high-light [data-radix-popper-content-wrapper],
+.contrast-inverted [data-radix-popper-content-wrapper] {
+  filter: none !important;
+}
+
+.contrast-high-dark [role="listbox"],
+.contrast-high-light [role="listbox"],
+.contrast-inverted [role="listbox"] {
+  background-color: #1f1f1f !important;
+  border: 2px solid #666666 !important;
+  color: #ffffff !important;
+  filter: none !important;
+}
+
+.contrast-high-dark [role="option"],
+.contrast-high-light [role="option"],
+.contrast-inverted [role="option"] {
+  color: #ffffff !important;
+}
+
+.contrast-high-dark [role="option"]:hover,
+.contrast-high-light [role="option"]:hover,
+.contrast-inverted [role="option"]:hover,
+.contrast-high-dark [role="option"][data-highlighted],
+.contrast-high-light [role="option"][data-highlighted],
+.contrast-inverted [role="option"][data-highlighted] {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.contrast-high-dark [role="option"] svg,
+.contrast-high-light [role="option"] svg,
+.contrast-inverted [role="option"] svg {
+  color: #ffffff !important;
+}
+
+/* ======================
+   TRYBY DLA DALTONISTÓW
+   ====================== */
+
+/* Protanopia (brak czerwonego) */
+.colorblind-protanopia {
+  filter: url('#protanopia-filter');
+  --destructive: 220 80% 50%;
+  --primary: 220 80% 50%;
+}
+
+.colorblind-protanopia .text-red-500,
+.colorblind-protanopia .text-red-600,
+.colorblind-protanopia .bg-red-500,
+.colorblind-protanopia .bg-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(59 130 246 / var(--tw-text-opacity)) !important;
+}
+
+/* Deuteranopia (brak zielonego) */
+.colorblind-deuteranopia {
+  filter: url('#deuteranopia-filter');
+  --primary: 280 80% 50%;
+}
+
+.colorblind-deuteranopia .text-green-500,
+.colorblind-deuteranopia .text-green-600,
+.colorblind-deuteranopia .bg-green-500,
+.colorblind-deuteranopia .bg-green-600 {
+  --tw-text-opacity: 1;
+  color: rgb(168 85 247 / var(--tw-text-opacity)) !important;
+}
+
+/* Tritanopia (brak niebieskiego) */
+.colorblind-tritanopia {
+  filter: url('#tritanopia-filter');
+}
+
+.colorblind-tritanopia .text-blue-500,
+.colorblind-tritanopia .text-blue-600,
+.colorblind-tritanopia .bg-blue-500,
+.colorblind-tritanopia .bg-blue-600 {
+  --tw-text-opacity: 1;
+  color: rgb(236 72 153 / var(--tw-text-opacity)) !important;
+}
+
+/* ======================
+   ROZMIAR CZCIONKI
+   ====================== */
+.font-size-large {
+  font-size: 112.5%; /* 18px base */
+}
+
+.font-size-large .text-xs {
+  font-size: 0.8rem !important;
+}
+
+.font-size-large .text-sm {
+  font-size: 0.95rem !important;
+}
+
+.font-size-xlarge {
+  font-size: 125%; /* 20px base */
+}
+
+.font-size-xlarge .text-xs {
+  font-size: 0.85rem !important;
+}
+
+.font-size-xlarge .text-sm {
+  font-size: 1rem !important;
+}
+
+.font-size-xxlarge {
+  font-size: 150%; /* 24px base */
+}
+
+.font-size-xxlarge .text-xs {
+  font-size: 0.9rem !important;
+}
+
+.font-size-xxlarge .text-sm {
+  font-size: 1.1rem !important;
+}
+
+/* ======================
+   PODKREŚLONE LINKI
+   ====================== */
+.underline-links a:not([class*="btn"]):not([role="button"]) {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+.underline-links a:hover {
+  text-decoration-thickness: 2px !important;
+}
+
+/* ======================
+   REDUKCJA ANIMACJI
+   ====================== */
+.reduce-animations,
+.reduce-animations * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduce-animations .animate-pulse,
+.reduce-animations .animate-spin,
+.reduce-animations .animate-bounce,
+.reduce-animations .animate-ping {
+  animation: none !important;
+}
+
+/* ======================
+   TRYB SKUPIENIA
+   ====================== */
+.focus-mode aside:not(:focus-within),
+.focus-mode nav:not(:focus-within),
+.focus-mode header:not(:focus-within) {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.focus-mode aside:hover,
+.focus-mode aside:focus-within,
+.focus-mode nav:hover,
+.focus-mode nav:focus-within,
+.focus-mode header:hover,
+.focus-mode header:focus-within {
+  opacity: 1;
+}
+
+.focus-mode main {
+  position: relative;
+  z-index: 1;
+}
+
+/* ======================
+   WIĘKSZE CELE KLIKANIA
+   ====================== */
+.larger-targets button,
+.larger-targets a,
+.larger-targets input,
+.larger-targets select,
+.larger-targets [role="button"] {
+  min-height: 48px !important;
+  min-width: 48px !important;
+  padding: 12px 16px !important;
+}
+
+.larger-targets .text-sm,
+.larger-targets .text-xs {
+  font-size: 1rem !important;
+}
+
+.larger-targets input[type="checkbox"],
+.larger-targets input[type="radio"] {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* ======================
+   CZCIONKA DYSLEKTYCZNA
+   ====================== */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+.dyslexic-font,
+.dyslexic-font * {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', 'Arial', sans-serif !important;
+}
+
+/* ======================
+   ZWIĘKSZONE ODSTĘPY
+   ====================== */
+.increased-spacing {
+  letter-spacing: 0.05em;
+  word-spacing: 0.15em;
+}
+
+.increased-spacing p,
+.increased-spacing li,
+.increased-spacing span,
+.increased-spacing div {
+  line-height: 1.8 !important;
+}
+
+.increased-spacing h1,
+.increased-spacing h2,
+.increased-spacing h3,
+.increased-spacing h4 {
+  line-height: 1.4 !important;
+  margin-bottom: 1em !important;
+}
+
+.increased-spacing p {
+  margin-bottom: 1.5em !important;
+}
+
+/* ======================
+   SKIP LINK
+   ====================== */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 12px 24px;
+  border-radius: 0 0 8px 8px;
+  font-weight: 600;
+  z-index: 9999;
+  transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* ======================
+   POPRAWIONE FOCUS STATES
+   ====================== */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* ======================
+   SVG FILTERS FOR COLOR BLINDNESS
+   ====================== */
