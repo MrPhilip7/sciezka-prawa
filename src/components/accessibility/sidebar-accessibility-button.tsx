@@ -51,12 +51,13 @@ export function SidebarAccessibilityButton() {
       />
       {/* Panel */}
       <div 
-        className="fixed left-72 bottom-24 z-[9999] w-[340px] rounded-xl shadow-2xl border bg-white dark:bg-zinc-900 dark:border-zinc-700"
+        className="accessibility-panel fixed left-72 bottom-24 z-[9999] w-[340px] rounded-xl shadow-2xl border"
+        style={{ backgroundColor: '#ffffff', color: '#1f1f1f', borderColor: '#e5e5e5' }}
       >
-        <div className="p-4 border-b dark:border-zinc-700">
+        <div className="p-4 border-b" style={{ borderColor: '#e5e5e5' }}>
           <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-lg font-semibold">
-              <EyeOff className="h-5 w-5 text-blue-500" />
+            <h3 className="flex items-center gap-2 text-lg font-semibold" style={{ color: '#1f1f1f' }}>
+              <EyeOff className="h-5 w-5" style={{ color: '#3b82f6' }} />
               Ułatwienia dostępu
             </h3>
             <Button 
@@ -74,8 +75,8 @@ export function SidebarAccessibilityButton() {
           {/* Tryb kontrastu */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Contrast className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <Label htmlFor="sidebar-contrast" className="text-sm">
+              <Contrast className="h-4 w-4" style={{ color: '#6b7280' }} />
+              <Label htmlFor="sidebar-contrast" className="text-sm" style={{ color: '#374151' }}>
                 Kontrast
               </Label>
             </div>
@@ -83,10 +84,10 @@ export function SidebarAccessibilityButton() {
               value={settings.contrastMode}
               onValueChange={(value) => updateSetting('contrastMode', value as 'none' | 'inverted' | 'high-contrast-dark' | 'high-contrast-light')}
             >
-              <SelectTrigger className="w-[140px] h-8 text-xs" id="sidebar-contrast">
+              <SelectTrigger className="w-[140px] h-8 text-xs" id="sidebar-contrast" style={{ backgroundColor: '#f3f4f6', color: '#1f1f1f', borderColor: '#d1d5db' }}>
                 <SelectValue placeholder="Wybierz" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[10000]" style={{ backgroundColor: '#ffffff', color: '#1f1f1f', borderColor: '#d1d5db' }}>
                 <SelectItem value="none">Wyłączony</SelectItem>
                 <SelectItem value="inverted">Odwrócone</SelectItem>
                 <SelectItem value="high-contrast-dark">Wysoki (ciemny)</SelectItem>
@@ -98,8 +99,8 @@ export function SidebarAccessibilityButton() {
           {/* Większy tekst */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Type className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <Label htmlFor="sidebar-font" className="text-sm cursor-pointer">
+              <Type className="h-4 w-4" style={{ color: '#6b7280' }} />
+              <Label htmlFor="sidebar-font" className="text-sm cursor-pointer" style={{ color: '#374151' }}>
                 Większy tekst
               </Label>
             </div>
@@ -113,8 +114,8 @@ export function SidebarAccessibilityButton() {
           {/* Redukcja animacji */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <Label htmlFor="sidebar-animations" className="text-sm cursor-pointer">
+              <Sparkles className="h-4 w-4" style={{ color: '#6b7280' }} />
+              <Label htmlFor="sidebar-animations" className="text-sm cursor-pointer" style={{ color: '#374151' }}>
                 Bez animacji
               </Label>
             </div>
@@ -128,8 +129,8 @@ export function SidebarAccessibilityButton() {
           {/* Tryb skupienia */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Focus className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <Label htmlFor="sidebar-focus" className="text-sm cursor-pointer">
+              <Focus className="h-4 w-4" style={{ color: '#6b7280' }} />
+              <Label htmlFor="sidebar-focus" className="text-sm cursor-pointer" style={{ color: '#374151' }}>
                 Tryb skupienia
               </Label>
             </div>
@@ -143,8 +144,8 @@ export function SidebarAccessibilityButton() {
           {/* Czcionka dla dysleksji */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <Label htmlFor="sidebar-dyslexic" className="text-sm cursor-pointer">
+              <BookOpen className="h-4 w-4" style={{ color: '#6b7280' }} />
+              <Label htmlFor="sidebar-dyslexic" className="text-sm cursor-pointer" style={{ color: '#374151' }}>
                 Czcionka dla dysleksji
               </Label>
             </div>
@@ -156,17 +157,18 @@ export function SidebarAccessibilityButton() {
           </div>
         </div>
 
-        <Separator />
+        <Separator style={{ backgroundColor: '#e5e5e5' }} />
 
         {/* Link do pełnych ustawień */}
         <div className="p-4">
           <Link 
             href="/settings?tab=accessibility"
-            className="flex items-center justify-between p-3 -m-3 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+            className="flex items-center justify-between p-3 -m-3 rounded-lg transition-colors"
+            style={{ color: '#374151' }}
             onClick={() => setIsOpen(false)}
           >
             <span className="text-sm font-medium">Wszystkie ustawienia dostępności</span>
-            <ChevronRight className="h-4 w-4 text-gray-500" />
+            <ChevronRight className="h-4 w-4" style={{ color: '#6b7280' }} />
           </Link>
         </div>
       </div>
