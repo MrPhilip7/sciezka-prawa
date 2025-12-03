@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { pl } from 'date-fns/locale'
@@ -17,6 +18,9 @@ import {
   XCircle,
   AlertCircle,
   FileSearch,
+  Youtube,
+  Radio,
+  ExternalLink,
 } from 'lucide-react'
 import type { Bill } from '@/types/supabase'
 
@@ -24,6 +28,13 @@ interface DashboardContentProps {
   recentBills: Bill[]
   alertsCount: number
   billsByStatus: Record<string, number>
+}
+
+interface YouTubeLiveData {
+  isLive: boolean
+  videoId: string | null
+  title: string | null
+  channelUrl: string
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -43,8 +54,81 @@ export function DashboardContent({ recentBills, alertsCount, billsByStatus }: Da
   const totalBills = Object.values(billsByStatus).reduce((a, b) => a + b, 0)
   const activeBills = totalBills - (billsByStatus.published || 0) - (billsByStatus.rejected || 0)
 
+  // YouTube Live state
+  const [youtubeLive, setYoutubeLive] = useState<YouTubeLiveData | null>(null)
+  
+  // Fetch YouTube live status
+  useEffect(() => {
+    async function fetchYouTubeLive() {
+      try {
+        const response = await fetch('/api/youtube-live')
+        const data = await response.json()
+        setYoutubeLive(data)
+      } catch (error) {
+        console.error('Failed to fetch YouTube live status:', error)
+      }
+    }
+    
+    fetchYouTubeLive()
+    // Refresh every 2 minutes
+    const interval = setInterval(fetchYouTubeLive, 2 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div className="space-y-6">
+      {/* Live Stream Banner */}
+      {youtubeLive?.isLive && youtubeLive.videoId && (
+        <Card className="border-red-500/50 bg-gradient-to-r from-red-500/10 via-red-500/5 to-transparent overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Video embed */}
+              <div className="lg:w-2/3 aspect-video bg-black">
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeLive.videoId}?autoplay=0`}
+                  title="Transmisja na żywo - Sejm RP"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </div>
+              
+              {/* Info panel */}
+              <div className="lg:w-1/3 p-4 flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="destructive" className="animate-pulse">
+                    <Radio className="h-3 w-3 mr-1" />
+                    NA ŻYWO
+                  </Badge>
+                </div>
+                <h3 className="font-semibold text-lg mb-2">
+                  Transmisja z Sejmu RP
+                </h3>
+                {youtubeLive.title && (
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {youtubeLive.title}
+                  </p>
+                )}
+                <div className="flex flex-col gap-2">
+                  <Link href={`https://www.youtube.com/watch?v=${youtubeLive.videoId}`} target="_blank">
+                    <Button className="w-full bg-red-600 hover:bg-red-700">
+                      <Youtube className="h-4 w-4 mr-2" />
+                      Oglądaj na YouTube
+                    </Button>
+                  </Link>
+                  <Link href="/calendar">
+                    <Button variant="outline" className="w-full">
+                      <Clock className="h-4 w-4 mr-2" />
+                      Zobacz kalendarz
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Welcome Section */}
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Witaj w Ścieżce Prawa</h2>

@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { flattenStages, getStatusFromStages, SejmProcessStage } from '@/lib/api/sejm'
 import type { Database } from '@/types/supabase'
 
+type BillStatus = Database['public']['Tables']['bills']['Row']['status']
+
 const SEJM_API_BASE = 'https://api.sejm.gov.pl'
 const TERM = 10
 
@@ -20,7 +22,19 @@ function createAdminClient() {
   })
 }
 
-async function syncProcess(number: string) {
+interface SyncResult {
+  success: boolean
+  message?: string
+  httpStatus?: number
+  billId?: string
+  sejmId?: string
+  status?: BillStatus
+  stagesCount?: number
+  eventsInserted?: number
+  events?: Array<{ event_type: string; event_date: string; description: string | null }>
+}
+
+async function syncProcess(number: string): Promise<SyncResult> {
   const supabase = createAdminClient()
   
   // Fetch single process details
@@ -30,7 +44,7 @@ async function syncProcess(number: string) {
   )
 
   if (!response.ok) {
-    return { success: false, message: `Process ${number} not found`, status: 404 }
+    return { success: false, message: `Process ${number} not found`, httpStatus: 404 }
   }
 
   const process = await response.json()
@@ -39,7 +53,7 @@ async function syncProcess(number: string) {
   const sejmId = `${TERM}-${process.number}`
   const stages = process.stages || []
   const stageEvents = flattenStages(stages as SejmProcessStage[])
-  const statusFromStages = stages.length > 0 ? getStatusFromStages(stages as SejmProcessStage[]) : 'submitted'
+  const statusFromStages = (stages.length > 0 ? getStatusFromStages(stages as SejmProcessStage[]) : 'submitted') as BillStatus
 
   console.log(`[SYNC-SINGLE] Found ${stages.length} stages, ${stageEvents.length} events`)
   console.log(`[SYNC-SINGLE] Events:`, JSON.stringify(stageEvents, null, 2))
@@ -52,7 +66,7 @@ async function syncProcess(number: string) {
     .single()
 
   if (!bill) {
-    return { success: false, message: `Bill ${sejmId} not found in database`, status: 404 }
+    return { success: false, message: `Bill ${sejmId} not found in database`, httpStatus: 404 }
   }
 
   // Update bill status
@@ -82,7 +96,7 @@ async function syncProcess(number: string) {
 
     if (eventsError) {
       console.error(`[SYNC-SINGLE] Error inserting events:`, eventsError)
-      return { success: false, message: `Error inserting events: ${eventsError.message}`, status: 500 }
+      return { success: false, message: `Error inserting events: ${eventsError.message}`, httpStatus: 500 }
     }
   }
 
@@ -106,7 +120,7 @@ export async function GET(
   try {
     const result = await syncProcess(number)
     if (!result.success) {
-      return NextResponse.json(result, { status: result.status || 500 })
+      return NextResponse.json(result, { status: result.httpStatus || 500 })
     }
     return NextResponse.json(result)
   } catch (error) {
@@ -127,7 +141,7 @@ export async function POST(
   try {
     const result = await syncProcess(number)
     if (!result.success) {
-      return NextResponse.json(result, { status: result.status || 500 })
+      return NextResponse.json(result, { status: result.httpStatus || 500 })
     }
     return NextResponse.json(result)
   } catch (error) {

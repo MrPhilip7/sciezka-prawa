@@ -19,6 +19,7 @@ import {
   Sun,
   Moon,
   Monitor,
+  Calendar,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
@@ -32,6 +33,12 @@ const navigation = [
     name: 'Ustawy',
     href: '/bills',
     icon: FileText,
+  },
+  {
+    name: 'Kalendarz',
+    href: '/calendar',
+    icon: Calendar,
+    badge: 'Nowy',
   },
   {
     name: 'Wyszukiwarka',
