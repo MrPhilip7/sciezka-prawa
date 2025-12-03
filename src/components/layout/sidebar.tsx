@@ -20,6 +20,7 @@ import {
   Moon,
   Monitor,
 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 const navigation = [
   {
@@ -36,6 +37,7 @@ const navigation = [
     name: 'Wyszukiwarka',
     href: '/search',
     icon: Search,
+    badge: 'AI',
   },
   {
     name: 'Powiadomienia',
@@ -94,7 +96,12 @@ export function Sidebar() {
                   )}
                 >
                   <item.icon className="h-5 w-5" />
-                  {item.name}
+                  <span className="flex-1 text-left">{item.name}</span>
+                  {item.badge && (
+                    <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 h-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+                      {item.badge}
+                    </Badge>
+                  )}
                 </Button>
               </Link>
             )
