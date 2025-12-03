@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Bell, Moon, Shield, Sun, Monitor, Accessibility, Settings } from 'lucide-react'
+import { Bell, Moon, Shield, Sun, Monitor, EyeOff, Settings } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
 import { AccessibilityPanel } from '@/components/accessibility'
 
@@ -35,7 +35,7 @@ export function SettingsContent() {
             Ogólne
           </TabsTrigger>
           <TabsTrigger value="accessibility" className="gap-2">
-            <Accessibility className="h-4 w-4" />
+            <EyeOff className="h-4 w-4" />
             Dostępność
           </TabsTrigger>
         </TabsList>

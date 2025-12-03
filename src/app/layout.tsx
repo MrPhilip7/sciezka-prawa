@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AccessibilityProvider } from "@/components/providers/accessibility-provider";
-import { AccessibilityButton } from "@/components/accessibility";
 import { AIAssistant } from "@/components/ai-assistant";
 import "./globals.css";
 import "@/styles/accessibility.css";
@@ -38,10 +37,9 @@ export default function RootLayout({
           <AccessibilityProvider>
             {/* Skip link dla nawigacji klawiaturowej */}
             <a href="#main-content" className="skip-link">
-              Przejdź do głównej treści
+              Przejść do głównej treści
             </a>
             {children}
-            <AccessibilityButton />
             <AIAssistant />
             <Toaster position="top-right" richColors />
           </AccessibilityProvider>

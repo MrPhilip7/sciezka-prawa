@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useTheme } from '@/components/theme-provider'
+import { SidebarAccessibilityButton } from '@/components/accessibility/sidebar-accessibility-button'
 import {
   LayoutDashboard,
   FileText,
@@ -128,6 +129,9 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="p-4 border-t space-y-4">
+        {/* Accessibility Button with floating panel */}
+        <SidebarAccessibilityButton />
+        
         {/* Theme Switcher */}
         <div className="flex items-center justify-between gap-1 p-1 rounded-lg bg-muted">
           <Button
