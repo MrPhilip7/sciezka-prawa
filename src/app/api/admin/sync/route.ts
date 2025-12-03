@@ -32,6 +32,10 @@ interface SejmProcess {
   web?: string
   UE?: string
   stages?: SejmProcessStageInternal[]
+  // Publication fields
+  ELI?: string  // European Legislation Identifier - if present, means published
+  passed?: boolean  // true if the bill/resolution was adopted
+  closureDate?: string  // date when process was closed/completed
 }
 
 interface SejmPrint {
@@ -46,6 +50,12 @@ interface SejmPrint {
 
 // Map Sejm process state to our status
 function mapStatus(process: SejmProcess, prints: SejmPrint[]): BillStatus {
+  // CRITICAL: Check ELI and passed fields first - these are the authoritative 
+  // indicators of publication from Sejm API
+  if (process.ELI || process.passed === true) {
+    return 'published'
+  }
+  
   // Check for keywords in title that indicate status
   const title = process.title.toLowerCase()
   
@@ -352,7 +362,16 @@ export async function POST() {
         const fullProcess = await fetchProcessDetails(process.number)
         const stages = fullProcess?.stages || []
         const stageEvents = flattenStages(stages as SejmProcessStage[])
-        const statusFromStages = stages.length > 0 ? getStatusFromStages(stages as SejmProcessStage[]) : mapStatus(process, prints)
+        
+        // Determine status - check ELI/passed first (authoritative), then stages
+        let status: BillStatus
+        if (fullProcess?.ELI || fullProcess?.passed === true) {
+          status = 'published'
+        } else if (stages.length > 0) {
+          status = getStatusFromStages(stages as SejmProcessStage[]) as BillStatus
+        } else {
+          status = mapStatus(process, prints)
+        }
         
         // Check if bill already exists
         const { data: existing } = await supabase
@@ -365,7 +384,7 @@ export async function POST() {
           sejm_id: sejmId,
           title: process.title,
           description: process.description || process.principlesOfLaw || null,
-          status: statusFromStages as BillStatus,
+          status: status,
           ministry: extractMinistry(process.createdBy),
           submission_date: submissionDate,
           external_url: externalUrl,
