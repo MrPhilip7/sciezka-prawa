@@ -152,9 +152,9 @@ export function DashboardContent({ recentBills, alertsCount, billsByStatus }: Da
                             <StatusIcon className="h-5 w-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
+                            <div className="grid grid-cols-[1fr_auto] gap-4 items-start">
                               <div className="min-w-0">
-                                <p className="font-medium truncate">{bill.title}</p>
+                                <p className="font-medium truncate" title={bill.title}>{bill.title}</p>
                                 <p className="text-sm text-muted-foreground truncate">
                                   {bill.sejm_id}{bill.ministry && ` • ${bill.ministry}`}
                                 </p>
