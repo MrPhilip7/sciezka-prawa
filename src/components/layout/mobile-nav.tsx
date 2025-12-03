@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Badge } from '@/components/ui/badge'
+import { createClient } from '@/lib/supabase/client'
+import type { UserRole } from '@/types/supabase'
 import {
   LayoutDashboard,
   FileText,
@@ -17,6 +20,8 @@ import {
   HelpCircle,
   Scale,
   X,
+  Shield,
+  Calendar,
 } from 'lucide-react'
 
 const navigation = [
@@ -29,6 +34,11 @@ const navigation = [
     name: 'Ustawy',
     href: '/bills',
     icon: FileText,
+  },
+  {
+    name: 'Kalendarz',
+    href: '/calendar',
+    icon: Calendar,
   },
   {
     name: 'Wyszukiwarka',
@@ -67,6 +77,31 @@ interface MobileNavProps {
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const pathname = usePathname()
+  const [userRole, setUserRole] = useState<UserRole | null>(null)
+  
+  // Fetch user role on mount
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile?.role) {
+          setUserRole(profile.role as UserRole)
+        }
+      }
+    }
+    
+    fetchUserRole()
+  }, [])
+  
+  const isAdmin = userRole === 'admin' || userRole === 'super_admin'
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -130,6 +165,32 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
               })}
             </nav>
           </div>
+          
+          {/* Admin Panel - only visible for admin and super_admin */}
+          {isAdmin && (
+            <div className="mt-8 px-3">
+              <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Administracja
+              </p>
+              <nav className="space-y-1">
+                <Link href="/admin" onClick={onClose}>
+                  <Button
+                    variant={pathname.startsWith('/admin') ? 'secondary' : 'ghost'}
+                    className={cn(
+                      'w-full justify-start gap-3',
+                      pathname.startsWith('/admin') && 'bg-primary/10 text-primary hover:bg-primary/15'
+                    )}
+                  >
+                    <Shield className="h-5 w-5" />
+                    <span className="flex-1 text-left">Panel admina</span>
+                    <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 h-5 bg-gradient-to-r from-red-500 to-orange-500 text-white border-0">
+                      Admin
+                    </Badge>
+                  </Button>
+                </Link>
+              </nav>
+            </div>
+          )}
         </ScrollArea>
       </SheetContent>
     </Sheet>

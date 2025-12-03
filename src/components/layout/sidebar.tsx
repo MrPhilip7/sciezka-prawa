@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -7,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useTheme } from '@/components/theme-provider'
 import { SidebarAccessibilityButton } from '@/components/accessibility/sidebar-accessibility-button'
+import { createClient } from '@/lib/supabase/client'
+import type { UserRole } from '@/types/supabase'
 import {
   LayoutDashboard,
   FileText,
@@ -20,6 +23,7 @@ import {
   Moon,
   Monitor,
   Calendar,
+  Shield,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
@@ -74,6 +78,31 @@ const secondaryNavigation = [
 export function Sidebar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
+  const [userRole, setUserRole] = useState<UserRole | null>(null)
+  
+  // Fetch user role on mount
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile?.role) {
+          setUserRole(profile.role as UserRole)
+        }
+      }
+    }
+    
+    fetchUserRole()
+  }, [])
+  
+  const isAdmin = userRole === 'admin' || userRole === 'super_admin'
 
   return (
     <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-background">
@@ -139,6 +168,32 @@ export function Sidebar() {
             })}
           </nav>
         </div>
+        
+        {/* Admin Panel - only visible for admin and super_admin */}
+        {isAdmin && (
+          <div className="mt-8 px-3">
+            <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Administracja
+            </p>
+            <nav className="space-y-1">
+              <Link href="/admin">
+                <Button
+                  variant={pathname.startsWith('/admin') ? 'secondary' : 'ghost'}
+                  className={cn(
+                    'w-full justify-start gap-3',
+                    pathname.startsWith('/admin') && 'bg-primary/10 text-primary hover:bg-primary/15'
+                  )}
+                >
+                  <Shield className="h-5 w-5" />
+                  <span className="flex-1 text-left">Panel admina</span>
+                  <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 h-5 bg-gradient-to-r from-red-500 to-orange-500 text-white border-0">
+                    Admin
+                  </Badge>
+                </Button>
+              </Link>
+            </nav>
+          </div>
+        )}
       </ScrollArea>
 
       {/* Footer */}
