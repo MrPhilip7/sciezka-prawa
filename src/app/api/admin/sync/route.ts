@@ -36,6 +36,9 @@ interface SejmProcess {
   ELI?: string  // European Legislation Identifier - if present, means published
   passed?: boolean  // true if the bill/resolution was adopted
   closureDate?: string  // date when process was closed/completed
+  address?: string  // ISAP publication address
+  displayAddress?: string  // Display address like "Dz.U. 2024 poz. 123"
+  titleFinal?: string  // Final title of the act after publication
 }
 
 interface SejmPrint {
@@ -63,15 +66,45 @@ function mapStatus(process: SejmProcess, prints: SejmPrint[]): BillStatus {
     return 'rejected'
   }
   
+  // Analyze stages if available
+  if (process.stages && process.stages.length > 0) {
+    // Find the most recent stage
+    const sortedStages = [...process.stages].sort((a, b) => 
+      new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+    )
+    
+    const lastStage = sortedStages[0]
+    const stageName = (lastStage?.stageName || '').toLowerCase()
+    const stageType = (lastStage?.stageType || '').toLowerCase()
+    
+    // Check stage type from API
+    if (stageType === 'publication' || stageName.includes('ogłoszenie')) {
+      return 'published'
+    }
+    if (stageName.includes('prezydent') || stageType.includes('president')) {
+      return 'presidential'
+    }
+    if (stageName.includes('senat') || stageType.includes('senate')) {
+      return 'senate'
+    }
+    if (stageName.includes('iii czytanie') || stageName.includes('trzecie czytanie')) {
+      return 'third_reading'
+    }
+    if (stageName.includes('ii czytanie') || stageName.includes('drugie czytanie')) {
+      return 'second_reading'
+    }
+    if (stageName.includes('komisj') || stageType.includes('committee')) {
+      return 'committee'
+    }
+    if (stageName.includes('i czytanie') || stageName.includes('pierwsze czytanie') || stageName.includes('skierowano')) {
+      return 'first_reading'
+    }
+  }
+  
   // Default to draft if just submitted
   const print = prints.find(p => p.processPrint?.includes(process.number))
   if (!print) {
     return 'draft'
-  }
-  
-  // Based on process stage - simplified logic
-  if (process.documentType === 'projekt uchwały') {
-    return 'committee'
   }
   
   return 'submitted'

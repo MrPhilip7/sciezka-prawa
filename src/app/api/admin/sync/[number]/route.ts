@@ -53,7 +53,19 @@ async function syncProcess(number: string): Promise<SyncResult> {
   const sejmId = `${TERM}-${process.number}`
   const stages = process.stages || []
   const stageEvents = flattenStages(stages as SejmProcessStage[])
-  const statusFromStages = (stages.length > 0 ? getStatusFromStages(stages as SejmProcessStage[]) : 'submitted') as BillStatus
+  
+  // Determine status - check ELI/passed first (authoritative), then stages
+  let status: BillStatus
+  if (process.ELI || process.passed === true) {
+    status = 'published'
+    console.log(`[SYNC-SINGLE] Status from ELI/passed: published`)
+  } else if (stages.length > 0) {
+    status = getStatusFromStages(stages as SejmProcessStage[]) as BillStatus
+    console.log(`[SYNC-SINGLE] Status from stages: ${status}`)
+  } else {
+    status = 'submitted'
+    console.log(`[SYNC-SINGLE] Default status: submitted`)
+  }
 
   console.log(`[SYNC-SINGLE] Found ${stages.length} stages, ${stageEvents.length} events`)
   console.log(`[SYNC-SINGLE] Events:`, JSON.stringify(stageEvents, null, 2))
@@ -72,7 +84,7 @@ async function syncProcess(number: string): Promise<SyncResult> {
   // Update bill status
   await supabase
     .from('bills')
-    .update({ status: statusFromStages, last_updated: new Date().toISOString() })
+    .update({ status: status, last_updated: new Date().toISOString() })
     .eq('id', bill.id)
 
   // Delete existing events
@@ -104,7 +116,7 @@ async function syncProcess(number: string): Promise<SyncResult> {
     success: true,
     billId: bill.id,
     sejmId,
-    status: statusFromStages,
+    status: status,
     stagesCount: stages.length,
     eventsInserted: stageEvents.length,
     events: stageEvents,

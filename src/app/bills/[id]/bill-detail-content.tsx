@@ -8,7 +8,6 @@ import { pl } from 'date-fns/locale'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   ArrowLeft,
@@ -20,8 +19,9 @@ import {
   FileText,
   Share2,
   CheckCircle2,
-  Circle,
+  ChevronRight,
   Loader2,
+  XCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Bill, BillEvent } from '@/types/supabase'
@@ -47,86 +47,55 @@ const statusConfig: Record<string, { label: string; color: string; step: number 
   rejected: { label: 'Odrzucona', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', step: -1 },
 }
 
+// Etapy procesu legislacyjnego - zgodnie ze stroną Sejmu
 const legislativeSteps = [
-  { key: 'submitted', label: 'Złożenie projektu', eventTypes: ['wpłynął', 'złożenie', 'projekt wpłynął', 'druk nr', 'submitted'] },
-  { key: 'first_reading', label: 'I Czytanie', eventTypes: ['i czytanie', 'pierwsze czytanie', 'skierowano do i czytania', 'first_reading', 'czytania w komisj', 'czytanie w komisj'] },
-  { key: 'committee', label: 'Prace w komisji', eventTypes: ['komisj', 'skierowano do komisji', 'prace w komisji', 'sprawozdanie komisji', 'committee', 'posiedzenie komisji'] },
-  { key: 'second_reading', label: 'II Czytanie', eventTypes: ['ii czytanie', 'drugie czytanie', 'second_reading'] },
-  { key: 'third_reading', label: 'III Czytanie', eventTypes: ['iii czytanie', 'trzecie czytanie', 'głosowanie', 'uchwalenie', 'third_reading'] },
-  { key: 'senate', label: 'Senat', eventTypes: ['przekazano do senatu', 'senat', 'stanowisko senatu', 'senate'] },
-  { key: 'presidential', label: 'Prezydent', eventTypes: ['przekazano prezydentowi', 'prezydent', 'podpis prezydenta', 'presidential'] },
-  { key: 'published', label: 'Publikacja', eventTypes: ['publikacja', 'dziennik ustaw', 'ogłoszono', 'opublikowano', 'published'] },
+  { key: 'submitted', label: 'Wpływ', shortLabel: 'Wpływ' },
+  { key: 'first_reading', label: 'I czytanie', shortLabel: 'I czyt.' },
+  { key: 'committee', label: 'Komisje', shortLabel: 'Komisje' },
+  { key: 'second_reading', label: 'II czytanie', shortLabel: 'II czyt.' },
+  { key: 'third_reading', label: 'III czytanie', shortLabel: 'III czyt.' },
+  { key: 'senate', label: 'Senat', shortLabel: 'Senat' },
+  { key: 'presidential', label: 'Prezydent', shortLabel: 'Prezyd.' },
+  { key: 'published', label: 'Dziennik Ustaw', shortLabel: 'Dz.U.' },
 ]
 
-// Funkcja do określenia ukończonych etapów na podstawie wydarzeń
-function getCompletedSteps(events: BillEvent[], currentStatus: string): Set<string> {
-  const completed = new Set<string>()
+// Mapowanie wydarzeń na etapy
+const eventToStepMap: Record<string, string[]> = {
+  submitted: ['wpłynął', 'złożenie', 'projekt wpłynął', 'druk nr', 'start'],
+  first_reading: ['i czytanie', 'pierwsze czytanie', 'skierowano do i czytania', 'czytanie w komisj', 'sejmreading'],
+  committee: ['komisj', 'sprawozdanie', 'posiedzenie komisji', 'praca w komisj', 'committee'],
+  second_reading: ['ii czytanie', 'drugie czytanie'],
+  third_reading: ['iii czytanie', 'trzecie czytanie', 'głosowanie', 'uchwalenie', 'voting'],
+  senate: ['przekazano do senatu', 'senat', 'stanowisko senatu'],
+  presidential: ['przekazano prezydentowi', 'prezydent', 'podpis prezydenta'],
+  published: ['publikacja', 'dziennik ustaw', 'ogłoszono', 'opublikowano', 'publication'],
+}
+
+// Określ aktualny etap na podstawie wydarzeń
+function getCurrentStep(events: BillEvent[], status: string): number {
+  let maxStep = -1
   
-  // Dodaj etapy na podstawie wydarzeń
-  events.forEach(event => {
-    const eventTypeLower = event.event_type.toLowerCase()
-    const descriptionLower = (event.description || '').toLowerCase()
-    const fullText = `${eventTypeLower} ${descriptionLower}`
-    
-    legislativeSteps.forEach(step => {
-      if (step.eventTypes.some(et => fullText.includes(et.toLowerCase()))) {
-        completed.add(step.key)
-      }
-    })
-  })
-  
-  // Dodaj etapy na podstawie obecnego statusu (jako fallback)
-  const statusStep = statusConfig[currentStatus]?.step || 0
+  // Najpierw sprawdź status
+  const statusStep = statusConfig[status]?.step ?? 0
   if (statusStep > 0) {
-    legislativeSteps.forEach((step, index) => {
-      if (index < statusStep) {
-        completed.add(step.key)
-      }
-    })
+    maxStep = statusStep - 1 // konwertuj na index
   }
   
-  return completed
-}
-
-// Funkcja do określenia aktualnego etapu na podstawie wydarzeń
-function getCurrentStepFromEvents(events: BillEvent[], currentStatus: string): number {
-  let maxStepIndex = -1
-  
-  events.forEach(event => {
-    const eventTypeLower = event.event_type.toLowerCase()
-    const descriptionLower = (event.description || '').toLowerCase()
-    const fullText = `${eventTypeLower} ${descriptionLower}`
-    
-    legislativeSteps.forEach((step, index) => {
-      if (step.eventTypes.some(et => fullText.includes(et.toLowerCase()))) {
-        if (index > maxStepIndex) {
-          maxStepIndex = index
-        }
-      }
-    })
-  })
-  
-  // Fallback do statusu
-  if (maxStepIndex === -1) {
-    const statusStep = statusConfig[currentStatus]?.step || 0
-    maxStepIndex = statusStep - 1 // step w statusConfig jest 1-based
-  }
-  
-  return maxStepIndex
-}
-
-// Funkcja do znalezienia daty dla danego etapu
-function getStepDate(events: BillEvent[], step: typeof legislativeSteps[0]): string | null {
+  // Potem sprawdź wydarzenia
   for (const event of events) {
-    const eventTypeLower = event.event_type.toLowerCase()
-    const descriptionLower = (event.description || '').toLowerCase()
-    const fullText = `${eventTypeLower} ${descriptionLower}`
+    const eventText = `${event.event_type} ${event.description || ''}`.toLowerCase()
     
-    if (step.eventTypes.some(et => fullText.includes(et.toLowerCase()))) {
-      return event.event_date
+    for (let i = 0; i < legislativeSteps.length; i++) {
+      const stepKey = legislativeSteps[i].key
+      const patterns = eventToStepMap[stepKey] || []
+      
+      if (patterns.some(p => eventText.includes(p))) {
+        if (i > maxStep) maxStep = i
+      }
     }
   }
-  return null
+  
+  return Math.max(0, maxStep)
 }
 
 export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isLoggedIn }: BillDetailContentProps) {
@@ -135,10 +104,9 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
   const [isTogglingAlert, setIsTogglingAlert] = useState(false)
   
   const status = statusConfig[bill.status] || statusConfig.draft
-  const completedSteps = getCompletedSteps(events, bill.status)
-  
-  // Znajdź aktualny etap na podstawie wydarzeń
-  const currentStepIndex = getCurrentStepFromEvents(events, bill.status)
+  const currentStep = getCurrentStep(events, bill.status)
+  const isRejected = bill.status === 'rejected'
+  const isPublished = bill.status === 'published'
 
   const toggleAlert = async () => {
     if (!isLoggedIn) {
@@ -261,76 +229,99 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
         </div>
       </div>
 
-      {/* Progress Steps */}
-      {bill.status !== 'rejected' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Postęp legislacyjny</CardTitle>
-            <CardDescription>
-              {events.length > 0 
-                ? `Na podstawie ${events.length} zarejestrowanych wydarzeń`
-                : 'Aktualna pozycja projektu w procesie legislacyjnym'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="relative">
-              {/* Progress line */}
-              <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-muted" />
-              <div 
-                className="absolute left-4 top-4 w-0.5 bg-primary transition-all duration-500"
-                style={{ height: `${Math.min((currentStepIndex / (legislativeSteps.length - 1)) * 100, 100)}%` }}
-              />
-
-              {/* Steps */}
-              <div className="space-y-6">
-                {legislativeSteps.map((step, index) => {
-                  // Etap jest ukończony jeśli jest przed aktualnym lub ma wydarzenie
-                  const isCompleted = index < currentStepIndex || (index === currentStepIndex && completedSteps.has(step.key))
-                  const isCurrent = index === currentStepIndex
-                  const stepDate = getStepDate(events, step)
-                  
-                  return (
-                    <div key={step.key} className="relative flex items-center gap-4 pl-8">
+      {/* Progress Steps - prosty układ ze strzałkami */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Postęp legislacyjny</CardTitle>
+          {isRejected && (
+            <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2 mt-1">
+              <XCircle className="h-4 w-4" />
+              Projekt został odrzucony
+            </p>
+          )}
+        </CardHeader>
+        <CardContent>
+          {/* Pasek postępu ze strzałkami - pokazuje też odrzucone projekty */}
+          <div className="overflow-x-auto">
+            <div className="flex items-center min-w-max py-2">
+              {legislativeSteps.map((step, index) => {
+                // Dla odrzuconych: etapy przed currentStep są ukończone, currentStep to miejsce odrzucenia
+                const isCompleted = isRejected 
+                  ? index < currentStep 
+                  : index < currentStep
+                const isRejectionPoint = isRejected && index === currentStep
+                const isCurrent = !isRejected && index === currentStep
+                const isPending = isRejected 
+                  ? index > currentStep 
+                  : index > currentStep
+                
+                return (
+                  <div key={step.key} className="flex items-center">
+                    {/* Etap */}
+                    <div className={`
+                      flex flex-col items-center px-2 sm:px-3
+                      ${isCompleted ? 'text-green-600 dark:text-green-400' : ''}
+                      ${isRejectionPoint ? 'text-red-600 dark:text-red-400 font-semibold' : ''}
+                      ${isCurrent ? 'text-primary font-semibold' : ''}
+                      ${isPending ? 'text-muted-foreground/50' : ''}
+                    `}>
+                      {/* Ikona/Kółko */}
                       <div className={`
-                        absolute left-2 -translate-x-1/2 w-5 h-5 rounded-full border-2 flex items-center justify-center
-                        ${isCompleted ? 'bg-primary border-primary' : isCurrent ? 'bg-background border-primary' : 'bg-background border-muted'}
+                        w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mb-1
+                        transition-colors duration-200
+                        ${isCompleted ? 'bg-green-100 dark:bg-green-900' : ''}
+                        ${isRejectionPoint ? 'bg-red-100 dark:bg-red-900 ring-2 ring-red-500' : ''}
+                        ${isCurrent ? 'bg-primary/20 ring-2 ring-primary' : ''}
+                        ${isPending ? 'bg-muted/50' : ''}
                       `}>
-                        {isCompleted && <CheckCircle2 className="h-3 w-3 text-primary-foreground" />}
-                        {isCurrent && !isCompleted && <Circle className="h-2 w-2 fill-primary text-primary" />}
-                      </div>
-                      <div className={`flex-1 ${isCurrent || isCompleted ? 'font-medium' : ''} ${!isCompleted && !isCurrent ? 'text-muted-foreground' : ''}`}>
-                        <span>{step.label}</span>
-                        {stepDate && (
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            ({format(new Date(stepDate), 'd MMM yyyy', { locale: pl })})
+                        {isCompleted ? (
+                          <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+                        ) : isRejectionPoint ? (
+                          <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400" />
+                        ) : (
+                          <span className={`text-xs sm:text-sm font-bold ${isCurrent ? 'text-primary' : 'text-muted-foreground/50'}`}>
+                            {index + 1}
                           </span>
                         )}
                       </div>
-                      {isCurrent && !isCompleted && (
-                        <Badge variant="outline" className="text-xs bg-primary/10">
-                          W trakcie
-                        </Badge>
-                      )}
-                      {isCompleted && (
-                        <Badge variant="secondary" className="text-xs">
-                          ✓
-                        </Badge>
-                      )}
+                      {/* Label */}
+                      <span className="text-[10px] sm:text-xs text-center whitespace-nowrap">
+                        <span className="hidden sm:inline">{step.label}</span>
+                        <span className="sm:hidden">{step.shortLabel}</span>
+                      </span>
                     </div>
-                  )
-                })}
-              </div>
+                    
+                    {/* Strzałka między etapami */}
+                    {index < legislativeSteps.length - 1 && (
+                      <ChevronRight className={`
+                        h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0
+                        ${index < currentStep ? 'text-green-500 dark:text-green-400' : ''}
+                        ${isRejectionPoint ? 'text-red-400/50' : ''}
+                        ${isPending && !isRejectionPoint ? 'text-muted-foreground/30' : ''}
+                      `} />
+                    )}
+                  </div>
+                )
+              })}
             </div>
-            
-            {events.length === 0 && (
-              <p className="mt-4 text-sm text-muted-foreground text-center">
-                ⚠️ Brak szczegółowych danych o przebiegu - pokazano szacowany stan na podstawie statusu
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          
+          {/* Link do strony Sejmu */}
+          {bill.external_url && (
+            <div className="mt-4 pt-3 border-t text-center">
+              <a 
+                href={bill.external_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+              >
+                Zobacz pełny przebieg na Sejm.gov.pl
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Tabs for details and timeline */}
       <Tabs defaultValue="details" className="space-y-6">

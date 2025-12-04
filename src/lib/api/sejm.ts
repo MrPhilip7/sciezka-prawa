@@ -193,11 +193,25 @@ export interface SejmProcessStage {
   printNumber?: string
   comment?: string
   decision?: string
+  sittingNum?: number
+  voting?: {
+    yes: number
+    no: number
+    abstain: number
+    notParticipating: number
+    date: string
+    title: string
+  }
 }
 
-// Rozszerzony interfejs procesu z etapami
+// Rozszerzony interfejs procesu z etapami i polami statusu
 export interface SejmProcessWithStages extends SejmProcess {
   stages?: SejmProcessStage[]
+  ELI?: string           // European Legislation Identifier - jeśli obecny, ustawa opublikowana
+  passed?: boolean       // true jeśli ustawa/uchwała została uchwalona
+  closureDate?: string   // data zamknięcia procesu
+  address?: string       // adres publikacyjny w ISAP
+  displayAddress?: string // wyświetlany adres publikacyjny (np. "Dz.U. 2024 poz. 123")
 }
 
 /**
@@ -252,24 +266,107 @@ export function flattenStages(stages: SejmProcessStage[]): Array<{ event_type: s
 }
 
 /**
- * Get current status from stages
+ * Get current status from stages - analyzes all stages to determine the most recent/relevant status
  */
 export function getStatusFromStages(stages: SejmProcessStage[]): string {
-  const events = flattenStages(stages)
-  if (events.length === 0) return 'submitted'
+  if (!stages || stages.length === 0) return 'submitted'
   
-  // Check last event
-  const lastEvent = events[events.length - 1]
-  const eventName = lastEvent.event_type.toLowerCase()
+  // Flatten all stages including children to analyze
+  const allStages: Array<{ stageName: string; stageType?: string; date: string; decision?: string }> = []
   
-  if (eventName.includes('odrzuc') || eventName.includes('wycof')) return 'rejected'
-  if (eventName.includes('publikacja') || eventName.includes('dziennik ustaw') || eventName.includes('ogłosz')) return 'published'
-  if (eventName.includes('prezydent') || eventName.includes('podpis')) return 'presidential'
-  if (eventName.includes('stanowisko senatu') || (eventName.includes('przekazan') && eventName.includes('senat'))) return 'senate'
-  if (eventName.includes('iii czytanie') || eventName.includes('trzecie czytanie') || eventName.includes('głosowanie')) return 'third_reading'
-  if (eventName.includes('ii czytanie') || eventName.includes('drugie czytanie')) return 'second_reading'
-  if (eventName.includes('komisj') || eventName.includes('sprawozdanie')) return 'committee'
-  if (eventName.includes('i czytanie') || eventName.includes('pierwsze czytanie') || eventName.includes('skierowano do')) return 'first_reading'
+  function collectStages(stageList: SejmProcessStage[]) {
+    for (const stage of stageList) {
+      allStages.push({
+        stageName: stage.stageName || '',
+        stageType: stage.stageType,
+        date: stage.date || '',
+        decision: stage.decision
+      })
+      if (stage.children && stage.children.length > 0) {
+        collectStages(stage.children)
+      }
+    }
+  }
+  
+  collectStages(stages)
+  
+  // Sort by date (most recent last)
+  allStages.sort((a, b) => {
+    if (!a.date) return -1
+    if (!b.date) return 1
+    return new Date(a.date).getTime() - new Date(b.date).getTime()
+  })
+  
+  // Check for definitive outcomes first (from any stage, prioritize these)
+  for (const stage of allStages) {
+    const name = (stage.stageName || '').toLowerCase()
+    const decision = (stage.decision || '').toLowerCase()
+    const stageType = (stage.stageType || '').toLowerCase()
+    
+    // Publikacja / ogłoszenie - ustawa weszła w życie
+    if (name.includes('ogłoszenie') || name.includes('publikacja') || 
+        name.includes('dziennik ustaw') || stageType === 'publication') {
+      return 'published'
+    }
+    
+    // Odrzucenie / wycofanie
+    if (name.includes('odrzucon') || name.includes('wycofan') || 
+        decision.includes('odrzucono') || decision.includes('wycofano')) {
+      return 'rejected'
+    }
+  }
+  
+  // Get the last (most recent) stage for current status
+  const lastStage = allStages[allStages.length - 1]
+  if (!lastStage) return 'submitted'
+  
+  const name = (lastStage.stageName || '').toLowerCase()
+  const stageType = (lastStage.stageType || '').toLowerCase()
+  const decision = (lastStage.decision || '').toLowerCase()
+  
+  // Etapy prezydenckie
+  if (name.includes('prezydent') || name.includes('podpis') || 
+      name.includes('przekazano prezydentowi') || stageType.includes('president')) {
+    return 'presidential'
+  }
+  
+  // Etapy senackie
+  if (name.includes('stanowisko senatu') || name.includes('przekazano do senatu') ||
+      name.includes('senat') || stageType.includes('senate')) {
+    return 'senate'
+  }
+  
+  // III czytanie
+  if (name.includes('iii czytanie') || name.includes('trzecie czytanie') ||
+      (stageType.includes('reading') && name.includes('trzeci'))) {
+    return 'third_reading'
+  }
+  
+  // II czytanie  
+  if (name.includes('ii czytanie') || name.includes('drugie czytanie') ||
+      (stageType.includes('reading') && name.includes('drugi'))) {
+    return 'second_reading'
+  }
+  
+  // Prace komisji
+  if (name.includes('komisj') || name.includes('sprawozdanie') || 
+      name.includes('prac') && name.includes('komisj') ||
+      stageType.includes('committee')) {
+    return 'committee'
+  }
+  
+  // I czytanie
+  if (name.includes('i czytanie') || name.includes('pierwsze czytanie') ||
+      name.includes('skierowano do') || name.includes('skierowanie') ||
+      (stageType.includes('reading') && (name.includes('pierwszy') || name.includes('i ')))) {
+    return 'first_reading'
+  }
+  
+  // Projekt wpłynął
+  if (name.includes('wpłynął') || name.includes('złożon') || 
+      stageType === 'start' || stageType.includes('submitted')) {
+    return 'submitted'
+  }
   
   return 'submitted'
 }
