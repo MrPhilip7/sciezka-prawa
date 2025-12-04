@@ -173,6 +173,25 @@ export function CalendarContent() {
     return events.filter(e => e.date >= today && e.date <= weekFromNow).slice(0, 10)
   }, [events])
   
+  // Get events for current month, grouped by day
+  const monthEvents = useMemo(() => {
+    const startStr = format(monthStart, 'yyyy-MM-dd')
+    const endStr = format(monthEnd, 'yyyy-MM-dd')
+    const filtered = events.filter(e => e.date >= startStr && e.date <= endStr)
+    
+    // Group by date
+    const grouped: Record<string, typeof events> = {}
+    filtered.forEach(event => {
+      if (!grouped[event.date]) {
+        grouped[event.date] = []
+      }
+      grouped[event.date].push(event)
+    })
+    
+    // Sort by date and return as array of [date, events]
+    return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b))
+  }, [events, monthStart, monthEnd])
+  
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1))
     setSelectedDate(null)
@@ -309,16 +328,23 @@ export function CalendarContent() {
                 })}
               </div>
             ) : (
-              /* List view */
+              /* List view - events grouped by day for current month */
               <ScrollArea className="h-[400px]">
-                <div className="space-y-2">
-                  {upcomingEvents.length === 0 ? (
+                <div className="space-y-4">
+                  {monthEvents.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
-                      Brak nadchodzących wydarzeń
+                      Brak wydarzeń w tym miesiącu
                     </p>
                   ) : (
-                    upcomingEvents.map(event => (
-                      <EventCard key={event.id} event={event} compact />
+                    monthEvents.map(([dateStr, dayEvents]) => (
+                      <div key={dateStr} className="space-y-2">
+                        <h4 className="text-sm font-medium text-muted-foreground border-b pb-1 sticky top-0 bg-background">
+                          {format(new Date(dateStr), 'EEEE, d MMMM', { locale: pl })}
+                        </h4>
+                        {dayEvents.map(event => (
+                          <EventCard key={event.id} event={event} compact />
+                        ))}
+                      </div>
                     ))
                   )}
                 </div>
