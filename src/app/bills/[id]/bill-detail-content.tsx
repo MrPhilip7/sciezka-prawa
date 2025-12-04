@@ -92,9 +92,9 @@ const legislativeSteps = [
 const eventToStepMap: Record<string, string[]> = {
   submitted: ['wpłynął', 'złożenie', 'projekt wpłynął', 'druk nr', 'start'],
   first_reading: ['i czytanie', 'pierwsze czytanie', 'skierowano do i czytania', 'czytanie w komisj', 'sejmreading'],
-  committee: ['komisj', 'sprawozdanie', 'posiedzenie komisji', 'praca w komisj', 'committee'],
-  second_reading: ['ii czytanie', 'drugie czytanie'],
-  third_reading: ['iii czytanie', 'trzecie czytanie', 'głosowanie', 'uchwalenie', 'voting'],
+  committee: ['praca w komisjach po i czytaniu', 'komisj', 'sprawozdanie', 'posiedzenie komisji', 'committee'],
+  second_reading: ['ii czytanie', 'drugie czytanie', 'praca w komisjach po ii czytaniu'],
+  third_reading: ['iii czytanie', 'trzecie czytanie', 'głosowanie końcowe', 'uchwalenie', 'uchwalono'],
   senate: ['przekazano do senatu', 'senat', 'stanowisko senatu'],
   presidential: ['przekazano prezydentowi', 'prezydent', 'podpis prezydenta'],
   published: ['publikacja', 'dziennik ustaw', 'ogłoszono', 'opublikowano', 'publication'],
@@ -110,9 +110,20 @@ function getCurrentStep(events: BillEvent[], status: string): number {
     maxStep = statusStep - 1 // konwertuj na index
   }
   
-  // Potem sprawdź wydarzenia
-  for (const event of events) {
+  // Potem sprawdź wydarzenia - sortuj chronologicznie i analizuj
+  const sortedEvents = [...events].sort((a, b) => 
+    new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
+  )
+  
+  for (const event of sortedEvents) {
     const eventText = `${event.event_type} ${event.description || ''}`.toLowerCase()
+    
+    // Specjalna logika dla pracy w komisjach po II czytaniu - oznacza że II czytanie jest ukończone
+    if (eventText.includes('praca w komisjach po ii czytaniu') || 
+        eventText.includes('komisjach po ii czytaniu')) {
+      maxStep = Math.max(maxStep, 4) // second_reading ukończone, między II a III
+      continue
+    }
     
     for (let i = 0; i < legislativeSteps.length; i++) {
       const stepKey = legislativeSteps[i].key

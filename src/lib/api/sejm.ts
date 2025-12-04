@@ -373,13 +373,19 @@ export function getStatusFromStages(stages: SejmProcessStage[]): string {
     return 'third_reading'
   }
   
+  // Praca w komisjach po II czytaniu - oznacza że II czytanie było, czekamy na III
+  if (name.includes('komisjach po ii czytaniu') || name.includes('po ii czytaniu') ||
+      name.includes('po drugim czytaniu')) {
+    return 'second_reading' // II czytanie ukończone
+  }
+  
   // II czytanie  
   if (name.includes('ii czytanie') || name.includes('drugie czytanie') ||
       (stageType.includes('reading') && name.includes('drugi'))) {
     return 'second_reading'
   }
   
-  // Prace komisji
+  // Prace komisji (po I czytaniu)
   if (name.includes('komisj') || name.includes('sprawozdanie') || 
       name.includes('prac') && name.includes('komisj') ||
       stageType.includes('committee')) {
