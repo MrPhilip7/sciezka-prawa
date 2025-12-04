@@ -81,10 +81,10 @@ export function DashboardContent({ recentBills, alertsCount, billsByStatus, isLo
       {/* Live Stream Banner */}
       {youtubeLive?.isLive && youtubeLive.videoId && (
         <Card className="border-red-500/50 bg-gradient-to-r from-red-500/10 via-red-500/5 to-transparent overflow-hidden">
-          <CardContent className="p-0">
+          <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Video embed */}
-              <div className="lg:w-2/3 aspect-video bg-black">
+              <div className="lg:w-2/3 aspect-video bg-black rounded-lg overflow-hidden">
                 <iframe
                   src={`https://www.youtube.com/embed/${youtubeLive.videoId}?autoplay=0`}
                   title="Transmisja na żywo - Sejm RP"
