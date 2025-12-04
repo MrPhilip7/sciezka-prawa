@@ -262,7 +262,38 @@ export function flattenStages(stages: SejmProcessStage[]): Array<{ event_type: s
   // Sort by date ascending
   events.sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
   
-  return events
+  // Remove redundant entries - if there's a more specific event on the same day, remove the generic one
+  const filteredEvents = events.filter((event, index) => {
+    const eventName = event.event_type.toLowerCase()
+    
+    // Check if there's a more specific event on the same day
+    const sameDay = events.filter(e => e.event_date === event.event_date)
+    if (sameDay.length > 1) {
+      // Generic names that should be removed if there's a more specific one
+      const isGeneric = eventName === 'skierowanie' || 
+                        eventName === 'czytanie' ||
+                        eventName === 'głosowanie' ||
+                        eventName === 'komisja' ||
+                        eventName === 'przekazanie'
+      
+      if (isGeneric) {
+        // Check if there's a more specific event on the same day
+        const hasMoreSpecific = sameDay.some(e => {
+          const otherName = e.event_type.toLowerCase()
+          return otherName !== eventName && 
+                 (otherName.includes(eventName) || 
+                  otherName.includes('skierowano') ||
+                  otherName.includes('czytania') ||
+                  otherName.length > eventName.length + 5)
+        })
+        if (hasMoreSpecific) return false
+      }
+    }
+    
+    return true
+  })
+  
+  return filteredEvents
 }
 
 /**

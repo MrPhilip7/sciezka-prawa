@@ -412,7 +412,7 @@ export function BillsContent({ bills, totalCount, currentPage, years, tags, filt
                         )}
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          Aktualizacja{' '}
+                          Ostatnia zmiana{' '}
                           {formatDistanceToNow(new Date(bill.last_updated), {
                             addSuffix: true,
                             locale: pl,

@@ -129,11 +129,33 @@ function extractMinistry(createdBy?: string): string | null {
   return null
 }
 
-// Extract submitter type from documentType and createdBy
-function extractSubmitterType(docType?: string, createdBy?: string): string {
+// Extract submitter type from documentType, createdBy, and title
+function extractSubmitterType(docType?: string, createdBy?: string, title?: string): string {
   const type = (docType || '').toLowerCase()
   const by = (createdBy || '').toLowerCase()
+  const t = (title || '').toLowerCase()
   
+  // First check title - most reliable source
+  if (t.includes('rządowy projekt') || t.includes('rzadowy projekt')) {
+    return 'rządowy'
+  }
+  if (t.includes('poselski projekt')) {
+    return 'poselski'
+  }
+  if (t.includes('senacki projekt') || t.includes('projekt senatu')) {
+    return 'senacki'
+  }
+  if (t.includes('obywatelski projekt')) {
+    return 'obywatelski'
+  }
+  if (t.includes('prezydencki projekt') || t.includes('projekt prezydenta')) {
+    return 'prezydencki'
+  }
+  if (t.includes('komisyjny projekt') || t.includes('projekt komisji')) {
+    return 'komisyjny'
+  }
+  
+  // Then check documentType
   if (type.includes('rządow') || by.includes('rada ministrów') || by.includes('prezes rady ministrów')) {
     return 'rządowy'
   }
@@ -202,9 +224,14 @@ function extractCategory(title: string): string {
     return 'środowisko'
   }
   
-  // Obronność i bezpieczeństwo
-  if (t.includes('obron') || t.includes('wojsk') || t.includes('żołnier') ||
-      t.includes('bezpiecz') || t.includes('służb') || t.includes('granicz')) {
+  // Obronność i bezpieczeństwo (narodowe/państwa, nie ubezpieczenia)
+  const isMilitary = t.includes('obronnoś') || t.includes('obronno') || t.includes('obrony narodowej') ||
+                     t.includes('wojsk') || t.includes('żołnier') || t.includes('sił zbrojnych') ||
+                     t.includes('armii') || t.includes('granicz') || t.includes('straż') ||
+                     t.includes('policj') || t.includes('służb specjaln') ||
+                     (t.includes('bezpieczeńst') && !t.includes('ubezpiecz') && 
+                      (t.includes('narodow') || t.includes('państw') || t.includes('publiczn') || t.includes('wewnętrzn')))
+  if (isMilitary) {
     return 'obronność'
   }
   
@@ -255,7 +282,7 @@ function extractTags(title: string): string[] {
     [/zdrow|medycz|lecznic/i, 'zdrowie'],
     [/edukac|szkoł|oświat/i, 'edukacja'],
     [/klimat|środowisk|ekolog/i, 'klimat'],
-    [/wojsk|obron|bezpiecz/i, 'bezpieczeństwo'],
+    [/wojsk|sił zbrojnych|żołnier|obronnoś|obrony narodowej/i, 'bezpieczeństwo'],
     [/cyfrow|elektron|internet/i, 'cyfryzacja'],
     [/rolnic|rolnik/i, 'rolnictwo'],
     [/transport|drogo|kolej/i, 'transport'],
@@ -264,6 +291,7 @@ function extractTags(title: string): string[] {
     [/wybor|referendum|głosow/i, 'wybory'],
     [/energi|prąd|gaz/i, 'energia'],
     [/prac|zatrudni|związk/i, 'praca'],
+    [/ubezpiecz/i, 'ubezpieczenia'],
   ]
   
   for (const [pattern, tag] of tagPatterns) {
@@ -413,6 +441,20 @@ export async function POST() {
           .eq('sejm_id', sejmId)
           .single()
 
+        // Determine last_updated from latest event date (not sync date)
+        let lastUpdated: string
+        if (stageEvents.length > 0) {
+          // Sort events by date descending and take the most recent
+          const sortedEvents = [...stageEvents].sort((a, b) => 
+            new Date(b.event_date).getTime() - new Date(a.event_date).getTime()
+          )
+          lastUpdated = sortedEvents[0].event_date
+        } else if (submissionDate) {
+          lastUpdated = submissionDate
+        } else {
+          lastUpdated = new Date().toISOString()
+        }
+
         const billData = {
           sejm_id: sejmId,
           title: process.title,
@@ -422,12 +464,12 @@ export async function POST() {
           submission_date: submissionDate,
           external_url: externalUrl,
           document_type: mapDocumentType(process.documentType),
-          submitter_type: extractSubmitterType(process.documentType, process.createdBy),
+          submitter_type: extractSubmitterType(process.documentType, process.createdBy, process.title),
           category: extractCategory(process.title),
           term: TERM,
           tags: extractTags(process.title),
           submission_year: submissionYear,
-          last_updated: new Date().toISOString(),
+          last_updated: lastUpdated,
         }
 
         let billId: string
