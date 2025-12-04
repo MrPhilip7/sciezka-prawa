@@ -100,6 +100,38 @@ const eventToStepMap: Record<string, string[]> = {
   published: ['publikacja', 'dziennik ustaw', 'ogłoszono', 'opublikowano', 'publication'],
 }
 
+// Określ szczegółowy aktualny status (sub-etap)
+function getCurrentDetailedStatus(events: BillEvent[]): string | null {
+  if (events.length === 0) return null
+  
+  // Znajdź ostatnie wydarzenie chronologicznie
+  const sortedEvents = [...events].sort((a, b) => 
+    new Date(b.event_date).getTime() - new Date(a.event_date).getTime()
+  )
+  
+  const lastEvent = sortedEvents[0]
+  const eventText = lastEvent.event_type.toLowerCase()
+  
+  // Specyficzne statusy
+  if (eventText.includes('praca w komisjach po ii czytaniu')) {
+    return 'W komisjach (po II czytaniu)'
+  }
+  if (eventText.includes('praca w komisjach po i czytaniu')) {
+    return 'W komisjach (po I czytaniu)'
+  }
+  if (eventText.includes('przekazano do senatu') || eventText.includes('stanowisko senatu')) {
+    return 'W Senacie'
+  }
+  if (eventText.includes('przekazano prezydentowi')) {
+    return 'Oczekuje na podpis Prezydenta'
+  }
+  if (eventText.includes('skierowano do i czytania')) {
+    return 'Skierowano do I czytania'
+  }
+  
+  return null
+}
+
 // Określ aktualny etap na podstawie wydarzeń
 function getCurrentStep(events: BillEvent[], status: string): number {
   let maxStep = -1
@@ -148,6 +180,7 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
   
   const status = statusConfig[bill.status] || statusConfig.draft
   const currentStep = getCurrentStep(events, bill.status)
+  const detailedStatus = getCurrentDetailedStatus(events)
   const isRejected = bill.status === 'rejected'
   const isPublished = bill.status === 'published'
 
@@ -367,6 +400,16 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
               })}
             </div>
           </div>
+          
+          {/* Aktualny szczegółowy status */}
+          {detailedStatus && !isRejected && !isPublished && (
+            <div className="mt-3 pt-3 border-t">
+              <p className="text-sm text-center">
+                <span className="text-muted-foreground">Aktualnie: </span>
+                <span className="font-medium text-primary">{detailedStatus}</span>
+              </p>
+            </div>
+          )}
           
           {/* Link do strony Sejmu */}
           {bill.external_url && (
