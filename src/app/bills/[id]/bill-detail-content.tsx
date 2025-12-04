@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { format, formatDistanceToNow } from 'date-fns'
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   ArrowLeft,
   Bell,
@@ -22,10 +23,38 @@ import {
   ChevronRight,
   Loader2,
   XCircle,
+  Vote,
+  Users,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Bill, BillEvent } from '@/types/supabase'
 import { toast } from 'sonner'
+
+// Types for voting data
+interface ClubVotingStats {
+  club: string
+  total: number
+  voted: number
+  yes: number
+  no: number
+  abstain: number
+  absent: number
+}
+
+interface VotingWithClubs {
+  votingNumber: number
+  sitting: number
+  date: string
+  title: string
+  topic?: string
+  totals: {
+    yes: number
+    no: number
+    abstain: number
+    notParticipating: number
+  }
+  clubs: ClubVotingStats[]
+}
 
 interface BillDetailContentProps {
   bill: Bill
@@ -102,11 +131,33 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
   const router = useRouter()
   const [hasAlert, setHasAlert] = useState(initialHasAlert)
   const [isTogglingAlert, setIsTogglingAlert] = useState(false)
+  const [votings, setVotings] = useState<VotingWithClubs[]>([])
+  const [votingsLoading, setVotingsLoading] = useState(false)
+  const [votingsLoaded, setVotingsLoaded] = useState(false)
   
   const status = statusConfig[bill.status] || statusConfig.draft
   const currentStep = getCurrentStep(events, bill.status)
   const isRejected = bill.status === 'rejected'
   const isPublished = bill.status === 'published'
+
+  // Fetch votings when tab is selected
+  const loadVotings = async () => {
+    if (votingsLoaded || votingsLoading) return
+    
+    setVotingsLoading(true)
+    try {
+      const response = await fetch(`/api/votings/${bill.sejm_id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setVotings(data.votings || [])
+      }
+    } catch (error) {
+      console.error('Failed to load votings:', error)
+    } finally {
+      setVotingsLoading(false)
+      setVotingsLoaded(true)
+    }
+  }
 
   const toggleAlert = async () => {
     if (!isLoggedIn) {
@@ -324,10 +375,16 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
       </Card>
 
       {/* Tabs for details and timeline */}
-      <Tabs defaultValue="details" className="space-y-6">
+      <Tabs defaultValue="details" className="space-y-6" onValueChange={(value) => {
+        if (value === 'votings') loadVotings()
+      }}>
         <TabsList>
           <TabsTrigger value="details">Szczegóły</TabsTrigger>
           <TabsTrigger value="timeline">Historia ({events.length})</TabsTrigger>
+          <TabsTrigger value="votings" className="gap-1.5">
+            <Vote className="h-4 w-4" />
+            Głosowania
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="space-y-6">
@@ -445,6 +502,125 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
                         {event.description && (
                           <p className="text-muted-foreground">{event.description}</p>
                         )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="votings">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Vote className="h-5 w-5" />
+                Głosowania nad projektem
+              </CardTitle>
+              <CardDescription>
+                Wyniki głosowań z podziałem na kluby parlamentarne
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {votingsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : votings.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Vote className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Brak zarejestrowanych głosowań dla tego projektu</p>
+                  <p className="text-sm mt-1">Głosowania pojawiają się podczas kolejnych czytań</p>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {votings.map((voting, vIndex) => (
+                    <div key={`${voting.sitting}-${voting.votingNumber}`} className="space-y-4">
+                      {vIndex > 0 && <div className="border-t pt-6" />}
+                      
+                      {/* Voting header */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          {format(new Date(voting.date), 'd MMMM yyyy, HH:mm', { locale: pl })}
+                          <span className="mx-1">•</span>
+                          <span>Posiedzenie {voting.sitting}, głosowanie nr {voting.votingNumber}</span>
+                        </div>
+                        <h4 className="font-medium">{voting.title}</h4>
+                        {voting.topic && (
+                          <p className="text-sm text-muted-foreground">{voting.topic}</p>
+                        )}
+                      </div>
+
+                      {/* Voting summary */}
+                      <div className="flex flex-wrap gap-3">
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          Za: {voting.totals.yes}
+                        </Badge>
+                        <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                          Przeciw: {voting.totals.no}
+                        </Badge>
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                          Wstrzymało się: {voting.totals.abstain}
+                        </Badge>
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                          Nie głosowało: {voting.totals.notParticipating}
+                        </Badge>
+                      </div>
+
+                      {/* Club breakdown table */}
+                      <div className="rounded-lg border overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-muted/50">
+                              <TableHead className="font-semibold">Klub/Koło</TableHead>
+                              <TableHead className="text-center font-semibold">Liczba czł.</TableHead>
+                              <TableHead className="text-center font-semibold">Głosowało</TableHead>
+                              <TableHead className="text-center font-semibold text-green-700 dark:text-green-400">Za</TableHead>
+                              <TableHead className="text-center font-semibold text-red-700 dark:text-red-400">Przeciw</TableHead>
+                              <TableHead className="text-center font-semibold text-amber-700 dark:text-amber-400">Wstrzymało się</TableHead>
+                              <TableHead className="text-center font-semibold text-gray-500">Nie głosowało</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {voting.clubs.map((club) => (
+                              <TableRow key={club.club} className="hover:bg-muted/30">
+                                <TableCell className="font-medium">{club.club}</TableCell>
+                                <TableCell className="text-center">{club.total}</TableCell>
+                                <TableCell className="text-center">{club.voted}</TableCell>
+                                <TableCell className="text-center">
+                                  {club.yes > 0 ? (
+                                    <span className="text-green-600 dark:text-green-400 font-semibold">{club.yes}</span>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {club.no > 0 ? (
+                                    <span className="text-red-600 dark:text-red-400 font-semibold">{club.no}</span>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {club.abstain > 0 ? (
+                                    <span className="text-amber-600 dark:text-amber-400 font-semibold">{club.abstain}</span>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {club.absent > 0 ? (
+                                    <span className="text-gray-500">{club.absent}</span>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
                       </div>
                     </div>
                   ))}
