@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { DashboardLayout } from '@/components/layout'
 import { ProfileContent } from './profile-content'
-import { redirect } from 'next/navigation'
+import { LoginRequired } from '@/components/auth'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -9,7 +9,14 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) {
-    redirect('/login')
+    return (
+      <DashboardLayout user={null}>
+        <LoginRequired 
+          title="Profil"
+          description="Zaloguj się, aby zobaczyć i edytować swój profil"
+        />
+      </DashboardLayout>
+    )
   }
 
   // Fetch user profile

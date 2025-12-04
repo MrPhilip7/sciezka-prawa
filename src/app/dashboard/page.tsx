@@ -36,6 +36,7 @@ export default async function DashboardPage() {
         recentBills={recentBills || []}
         alertsCount={alertsCount || 0}
         billsByStatus={billsByStatus}
+        isLoggedIn={!!user}
       />
     </DashboardLayout>
   )

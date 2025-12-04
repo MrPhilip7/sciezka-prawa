@@ -8,7 +8,7 @@ export default async function SettingsPage() {
 
   return (
     <DashboardLayout user={user}>
-      <SettingsContent />
+      <SettingsContent isLoggedIn={!!user} />
     </DashboardLayout>
   )
 }

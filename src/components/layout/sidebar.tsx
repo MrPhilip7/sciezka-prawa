@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -24,41 +24,54 @@ import {
   Monitor,
   Calendar,
   Shield,
+  Lock,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { toast } from 'sonner'
 
-const navigation = [
+// Items available to everyone
+const publicNavigation = [
   {
     name: 'Panel',
     href: '/dashboard',
     icon: LayoutDashboard,
+    requiresAuth: false,
   },
   {
     name: 'Ustawy',
     href: '/bills',
     icon: FileText,
+    requiresAuth: false,
   },
   {
     name: 'Kalendarz',
     href: '/calendar',
     icon: Calendar,
     badge: 'Nowy',
+    requiresAuth: false,
   },
+]
+
+// Items that require login
+const authRequiredNavigation = [
   {
     name: 'Wyszukiwarka',
     href: '/search',
     icon: Search,
     badge: 'AI',
+    requiresAuth: true,
   },
   {
     name: 'Powiadomienia',
     href: '/alerts',
     icon: Bell,
+    requiresAuth: true,
   },
   {
     name: 'Zapisane',
     href: '/saved',
     icon: Bookmark,
+    requiresAuth: true,
   },
 ]
 
@@ -67,24 +80,30 @@ const secondaryNavigation = [
     name: 'Ustawienia',
     href: '/settings',
     icon: Settings,
+    requiresAuth: false,
   },
   {
     name: 'Pomoc',
     href: '/help',
     icon: HelpCircle,
+    requiresAuth: false,
   },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [userRole, setUserRole] = useState<UserRole | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
   
   // Fetch user role on mount
   useEffect(() => {
     const fetchUserRole = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+      
+      setIsLoggedIn(!!user)
       
       if (user) {
         const { data: profile } = await supabase
@@ -103,6 +122,23 @@ export function Sidebar() {
   }, [])
   
   const isAdmin = userRole === 'admin' || userRole === 'super_admin'
+  
+  // Handle click on auth-required items when not logged in
+  const handleAuthRequiredClick = (e: React.MouseEvent, itemName: string) => {
+    if (isLoggedIn === false) {
+      e.preventDefault()
+      toast.info(`Funkcja "${itemName}" wymaga zalogowania`, {
+        description: 'Zaloguj się, aby uzyskać dostęp do wszystkich funkcji.',
+        action: {
+          label: 'Zaloguj się',
+          onClick: () => router.push('/login')
+        }
+      })
+    }
+  }
+  
+  // Combine navigation items
+  const navigation = [...publicNavigation, ...authRequiredNavigation]
 
   return (
     <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-background">
@@ -122,22 +158,31 @@ export function Sidebar() {
         <nav className="space-y-1 px-3">
           {navigation.map((item) => {
             const isActive = pathname.startsWith(item.href)
+            const isDisabled = item.requiresAuth && isLoggedIn === false
+            
             return (
-              <Link key={item.name} href={item.href}>
+              <Link 
+                key={item.name} 
+                href={isDisabled ? '#' : item.href}
+                onClick={(e) => item.requiresAuth && handleAuthRequiredClick(e, item.name)}
+              >
                 <Button
                   variant={isActive ? 'secondary' : 'ghost'}
                   className={cn(
                     'w-full justify-start gap-3',
-                    isActive && 'bg-primary/10 text-primary hover:bg-primary/15'
+                    isActive && 'bg-primary/10 text-primary hover:bg-primary/15',
+                    isDisabled && 'opacity-50'
                   )}
                 >
                   <item.icon className="h-5 w-5" />
                   <span className="flex-1 text-left">{item.name}</span>
-                  {item.badge && (
+                  {isDisabled ? (
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                  ) : item.badge ? (
                     <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 h-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
                       {item.badge}
                     </Badge>
-                  )}
+                  ) : null}
                 </Button>
               </Link>
             )

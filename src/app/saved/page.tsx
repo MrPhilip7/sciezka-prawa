@@ -1,17 +1,29 @@
 import { createClient } from '@/lib/supabase/server'
 import { DashboardLayout } from '@/components/layout'
 import { SavedContent } from './saved-content'
+import { LoginRequired } from '@/components/auth'
 
 export default async function SavedPage() {
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   
+  if (!user) {
+    return (
+      <DashboardLayout user={null}>
+        <LoginRequired 
+          title="Zapisane"
+          description="Zaloguj się, aby zapisywać wyszukiwania i śledzić ulubione ustawy"
+        />
+      </DashboardLayout>
+    )
+  }
+  
   // Fetch saved searches
   const { data: savedSearches } = await supabase
     .from('saved_searches')
     .select('*')
-    .eq('user_id', user?.id || '')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   // Fetch user alerts with bill details
@@ -21,7 +33,7 @@ export default async function SavedPage() {
       *,
       bills (*)
     `)
-    .eq('user_id', user?.id || '')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   return (

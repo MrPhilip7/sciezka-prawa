@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AccessibilityProvider } from "@/components/providers/accessibility-provider";
-import { AIAssistant } from "@/components/ai-assistant";
+import { AIAssistantWrapper } from "@/components/ai-assistant-wrapper";
 import "./globals.css";
 import "@/styles/accessibility.css";
 
@@ -40,7 +40,7 @@ export default function RootLayout({
               Przejść do głównej treści
             </a>
             {children}
-            <AIAssistant />
+            <AIAssistantWrapper />
             <Toaster position="top-right" richColors />
           </AccessibilityProvider>
         </ThemeProvider>

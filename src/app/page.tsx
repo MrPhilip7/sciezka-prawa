@@ -67,13 +67,13 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="gap-2">
-              <Link href="/register">
+              <Link href="/dashboard">
                 Rozpocznij za darmo
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/dashboard">
+              <Link href="/bills">
                 Przeglądaj ustawy
               </Link>
             </Button>
@@ -184,9 +184,9 @@ export default function HomePage() {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">1</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Zarejestruj się</h3>
+              <h3 className="text-xl font-semibold mb-2">Przeglądaj ustawy</h3>
               <p className="text-muted-foreground">
-                Utwórz bezpłatne konto, aby uzyskać dostęp do wszystkich funkcji platformy
+                Przeglądaj wszystkie projekty ustaw bez konieczności rejestracji
               </p>
             </div>
 
@@ -194,9 +194,9 @@ export default function HomePage() {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">2</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Wyszukaj ustawy</h3>
+              <h3 className="text-xl font-semibold mb-2">Zarejestruj się</h3>
               <p className="text-muted-foreground">
-                Przeglądaj projekty ustaw i znajdź te, które Cię interesują
+                Utwórz bezpłatne konto, aby uzyskać dostęp do wyszukiwarki AI i powiadomień
               </p>
             </div>
 
@@ -204,9 +204,9 @@ export default function HomePage() {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">3</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Ustaw alerty</h3>
+              <h3 className="text-xl font-semibold mb-2">Śledź zmiany</h3>
               <p className="text-muted-foreground">
-                Dodaj powiadomienia i bądź informowany o każdej zmianie w projekcie
+                Ustaw alerty i bądź informowany o każdej zmianie w śledzonych projektach
               </p>
             </div>
           </div>
@@ -221,14 +221,19 @@ export default function HomePage() {
               Zacznij śledzić ustawy już dziś
             </h2>
             <p className="text-primary-foreground/80 text-lg mb-8 max-w-2xl mx-auto">
-              Dołącz do tysięcy obywateli, którzy są na bieżąco z polskim prawodawstwem.
-              Rejestracja jest bezpłatna.
+              Przeglądaj ustawy bez rejestracji lub załóż bezpłatne konto,
+              aby odblokować wszystkie funkcje.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild className="gap-2">
+                <Link href="/dashboard">
+                  Przeglądaj ustawy
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="bg-transparent border-primary-foreground/30 hover:bg-primary-foreground/10">
                 <Link href="/register">
                   Utwórz bezpłatne konto
-                  <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
             </div>

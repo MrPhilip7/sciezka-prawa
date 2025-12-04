@@ -28,6 +28,7 @@ interface DashboardContentProps {
   recentBills: Bill[]
   alertsCount: number
   billsByStatus: Record<string, number>
+  isLoggedIn: boolean
 }
 
 interface YouTubeLiveData {
@@ -50,7 +51,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
   rejected: { label: 'Odrzucona', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', icon: XCircle },
 }
 
-export function DashboardContent({ recentBills, alertsCount, billsByStatus }: DashboardContentProps) {
+export function DashboardContent({ recentBills, alertsCount, billsByStatus, isLoggedIn }: DashboardContentProps) {
   const totalBills = Object.values(billsByStatus).reduce((a, b) => a + b, 0)
   const activeBills = totalBills - (billsByStatus.published || 0) - (billsByStatus.rejected || 0)
 
@@ -165,18 +166,35 @@ export function DashboardContent({ recentBills, alertsCount, billsByStatus }: Da
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Twoje powiadomienia</CardTitle>
-            <Bell className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{alertsCount}</div>
-            <p className="text-xs text-muted-foreground">
-              aktywnych alertów
-            </p>
-          </CardContent>
-        </Card>
+        {isLoggedIn ? (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Twoje powiadomienia</CardTitle>
+              <Bell className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{alertsCount}</div>
+              <p className="text-xs text-muted-foreground">
+                aktywnych alertów
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="opacity-75">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Powiadomienia</CardTitle>
+              <Bell className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Zaloguj się, aby śledzić ustawy
+              </p>
+              <Button variant="link" size="sm" className="p-0 h-auto mt-1" asChild>
+                <Link href="/login">Zaloguj się →</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -309,37 +327,58 @@ export function DashboardContent({ recentBills, alertsCount, billsByStatus }: Da
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Szybkie akcje</CardTitle>
-          <CardDescription>
-            Przejdź bezpośrednio do najważniejszych funkcji
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-              <Link href="/search">
-                <FileSearch className="h-6 w-6" />
-                <span>Wyszukaj ustawę</span>
-              </Link>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-              <Link href="/bills">
-                <FileText className="h-6 w-6" />
-                <span>Przeglądaj ustawy</span>
-              </Link>
-            </Button>
-            <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
-              <Link href="/alerts">
-                <Bell className="h-6 w-6" />
-                <span>Zarządzaj alertami</span>
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Quick Actions - different for logged in vs not */}
+      {isLoggedIn ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Szybkie akcje</CardTitle>
+            <CardDescription>
+              Przejdź bezpośrednio do najważniejszych funkcji
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+                <Link href="/search">
+                  <FileSearch className="h-6 w-6" />
+                  <span>Wyszukaj ustawę</span>
+                </Link>
+              </Button>
+              <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+                <Link href="/bills">
+                  <FileText className="h-6 w-6" />
+                  <span>Przeglądaj ustawy</span>
+                </Link>
+              </Button>
+              <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
+                <Link href="/alerts">
+                  <Bell className="h-6 w-6" />
+                  <span>Zarządzaj alertami</span>
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle>Zaloguj się, aby odblokować więcej funkcji</CardTitle>
+            <CardDescription>
+              Po zalogowaniu zyskasz dostęp do wyszukiwarki AI, powiadomień i zapisanych ustaw
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3">
+              <Button asChild>
+                <Link href="/login">Zaloguj się</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/register">Utwórz konto</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
