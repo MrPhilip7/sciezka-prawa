@@ -18,6 +18,9 @@ import {
   User as UserIcon,
   Loader2,
   Save,
+  Key,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -34,7 +37,14 @@ interface ProfileContentProps {
 
 export function ProfileContent({ user, profile, stats }: ProfileContentProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false)
   const [fullName, setFullName] = useState(profile?.full_name || user.user_metadata?.full_name || '')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const getInitials = (name?: string | null, email?: string) => {
     if (name) {
@@ -75,6 +85,40 @@ export function ProfileContent({ user, profile, stats }: ProfileContentProps) {
       toast.error('Wystąpił błąd. Spróbuj ponownie.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (newPassword !== confirmPassword) {
+      toast.error('Nowe hasła nie są identyczne')
+      return
+    }
+    
+    if (newPassword.length < 6) {
+      toast.error('Hasło musi mieć co najmniej 6 znaków')
+      return
+    }
+    
+    setIsPasswordLoading(true)
+    const supabase = createClient()
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (error) throw error
+
+      toast.success('Hasło zostało zmienione')
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error: any) {
+      toast.error(error.message || 'Wystąpił błąd. Spróbuj ponownie.')
+    } finally {
+      setIsPasswordLoading(false)
     }
   }
 
@@ -158,6 +202,117 @@ export function ProfileContent({ user, profile, stats }: ProfileContentProps) {
                   <Save className="h-4 w-4" />
                 )}
                 Zapisz zmiany
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Password Change Card */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Zmiana hasła
+            </CardTitle>
+            <CardDescription>
+              Zmień hasło do swojego konta
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Aktualne hasło</Label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="currentPassword"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    placeholder="Wprowadź aktualne hasło"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  >
+                    {showCurrentPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Nowe hasło</Label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="newPassword"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    placeholder="Minimum 6 znaków"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Potwierdź nowe hasło</Label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    placeholder="Powtórz nowe hasło"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <Button type="submit" disabled={isPasswordLoading || !newPassword || !confirmPassword} className="gap-2">
+                {isPasswordLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Key className="h-4 w-4" />
+                )}
+                Zmień hasło
               </Button>
             </form>
           </CardContent>

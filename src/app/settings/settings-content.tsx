@@ -1,16 +1,29 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Bell, Moon, Shield, Sun, Monitor, EyeOff, Settings, Lock } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Bell, Moon, Shield, Sun, Monitor, EyeOff, Settings, Lock, Loader2, AlertTriangle } from 'lucide-react'
 import { useTheme } from '@/components/theme-provider'
 import { AccessibilityPanel } from '@/components/accessibility'
+import { toast } from 'sonner'
 
 interface SettingsContentProps {
   isLoggedIn?: boolean
@@ -19,9 +32,43 @@ interface SettingsContentProps {
 export function SettingsContent({ isLoggedIn = false }: SettingsContentProps) {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const defaultTab = searchParams.get('tab') || 'general'
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const isDarkMode = resolvedTheme === 'dark'
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== 'USUŃ KONTO') {
+      toast.error('Wpisz "USUŃ KONTO" aby potwierdzić')
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      const response = await fetch('/api/account/delete', {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Wystąpił błąd podczas usuwania konta')
+      }
+      
+      toast.success('Konto zostało usunięte')
+      router.push('/')
+    } catch (error: any) {
+      toast.error(error.message || 'Wystąpił błąd podczas usuwania konta')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteDialog(false)
+      setDeleteConfirmation('')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -219,9 +266,63 @@ export function SettingsContent({ isLoggedIn = false }: SettingsContentProps) {
                     Trwale usuń swoje konto i wszystkie dane
                   </p>
                 </div>
-                <Button variant="destructive" size="sm">
-                  Usuń konto
-                </Button>
+                <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      Usuń konto
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle className="h-5 w-5" />
+                        Czy na pewno chcesz usunąć konto?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-4">
+                        <p>
+                          Ta operacja jest <strong>nieodwracalna</strong>. Wszystkie Twoje dane zostaną trwale usunięte:
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                          <li>Profil i dane osobowe</li>
+                          <li>Zapisane wyszukiwania</li>
+                          <li>Alerty i powiadomienia</li>
+                          <li>Historia aktywności</li>
+                        </ul>
+                        <div className="pt-4">
+                          <Label htmlFor="deleteConfirmation" className="text-foreground">
+                            Wpisz <strong>USUŃ KONTO</strong> aby potwierdzić:
+                          </Label>
+                          <Input
+                            id="deleteConfirmation"
+                            value={deleteConfirmation}
+                            onChange={(e) => setDeleteConfirmation(e.target.value)}
+                            placeholder="USUŃ KONTO"
+                            className="mt-2"
+                          />
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>
+                        Anuluj
+                      </AlertDialogCancel>
+                      <Button
+                        variant="destructive"
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting || deleteConfirmation !== 'USUŃ KONTO'}
+                      >
+                        {isDeleting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Usuwanie...
+                          </>
+                        ) : (
+                          'Usuń konto na zawsze'
+                        )}
+                      </Button>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
