@@ -1,0 +1,492 @@
+<html lang="pl" class="scroll-smooth"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legislatura - Monitorowanie Procesu Legislacyjnego</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b; /* Zinc 950 */
+            color: #f4f4f5; /* Zinc 100 */
+        }
+        /* Custom scrollbar for sleek look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+        
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to bottom right, #ffffff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(63,63,70,0.15) 0%, rgba(9,9,11,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+    
+</head>
+<body class="antialiased selection:bg-zinc-700 selection:text-white overflow-x-hidden">
+
+    <!-- Background Glow Effects -->
+    <div class="glow top-[-200px] left-[-100px]"></div>
+    <div class="glow bottom-[-200px] right-[-100px]"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 bg-zinc-950 rounded-full"></div>
+                </div>
+                <span class="text-sm font-semibold tracking-tighter text-white">LEGISLATURA</span>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8 text-xs font-medium text-zinc-400">
+                <a href="#features" class="hover:text-white transition-colors">Funkcje</a>
+                <a href="#live-feed" class="hover:text-white transition-colors">Na Żywo</a>
+                <a href="#pricing" class="hover:text-white transition-colors">Cennik</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="#" class="text-xs font-medium text-zinc-400 hover:text-white transition-colors hidden sm:block">Zaloguj się</a>
+                <a href="#" class="text-xs font-medium bg-white text-zinc-950 px-4 py-2 rounded-full hover:bg-zinc-200 transition-colors">Rozpocznij</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative pt-32 pb-20 px-6 overflow-hidden">
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 text-xxs font-medium text-zinc-400 mb-8">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                System ELI &amp; API Sejmu zintegrowane
+            </div>
+            <h1 class="text-5xl md:text-7xl font-medium tracking-tight mb-6 gradient-text leading-[1.1]">
+                Przejrzystość prawa<br>w Twoich rękach.
+            </h1>
+            <p class="text-lg text-zinc-400 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+                Platforma umożliwiająca śledzenie procesu legislacyjnego w Polsce. Monitoruj projekty ustaw, otrzymuj powiadomienia i bądź świadomym obywatelem.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button class="h-10 px-6 rounded-full bg-white text-zinc-950 text-sm font-medium hover:bg-zinc-200 transition-all flex items-center gap-2">
+                    Rozpocznij monitoring
+                    <iconify-icon icon="lucide:arrow-right" width="16" stroke-width="1.5"></iconify-icon>
+                </button>
+                <button class="h-10 px-6 rounded-full border border-zinc-700 text-zinc-300 text-sm font-medium hover:bg-zinc-900 transition-all flex items-center gap-2">
+                    <iconify-icon icon="lucide:search" width="16" stroke-width="1.5"></iconify-icon>
+                    Przeglądaj ustawy
+                </button>
+            </div>
+        </div>
+
+        <!-- UI Mockup: Legislative Dashboard -->
+        <div class="max-w-6xl mx-auto mt-20 relative">
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent z-10 h-full w-full pointer-events-none"></div>
+            
+            <div class="glass-panel rounded-xl overflow-hidden shadow-2xl shadow-zinc-950/50">
+                <!-- Mockup Header -->
+                <div class="h-12 border-b border-zinc-800/50 flex items-center px-4 justify-between bg-zinc-900/50">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-zinc-700"></div>
+                        <div class="w-3 h-3 rounded-full bg-zinc-700"></div>
+                        <div class="w-3 h-3 rounded-full bg-zinc-700"></div>
+                    </div>
+                    <div class="flex items-center gap-3 bg-zinc-950/50 border border-zinc-800/50 rounded-md px-3 py-1 w-96">
+                        <iconify-icon icon="lucide:search" class="text-zinc-500" width="14"></iconify-icon>
+                        <span class="text-xs text-zinc-500">Szukaj projektu (np. Druk nr 321)...</span>
+                    </div>
+                    <div class="w-4"></div>
+                </div>
+
+                <!-- Mockup Body -->
+                <div class="grid grid-cols-1 md:grid-cols-12 min-h-[500px]">
+                    <!-- Sidebar -->
+                    <div class="md:col-span-3 border-r border-zinc-800/50 p-4 bg-zinc-900/20 hidden md:block">
+                        <div class="text-xs font-semibold text-zinc-500 mb-4 tracking-wider uppercase">Filtry</div>
+                        
+                        <div class="space-y-1 mb-6">
+                            <div class="flex items-center justify-between p-2 rounded hover:bg-zinc-800/50 cursor-pointer group text-sm text-zinc-300">
+                                <span class="flex items-center gap-2">
+                                    <iconify-icon icon="lucide:inbox" class="text-zinc-500 group-hover:text-zinc-300"></iconify-icon>
+                                    Wszystkie
+                                </span>
+                                <span class="text-xs text-zinc-600">124</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded bg-zinc-800/50 cursor-pointer text-sm text-white font-medium">
+                                <span class="flex items-center gap-2">
+                                    <iconify-icon icon="lucide:flame" class="text-orange-500"></iconify-icon>
+                                    Gorące tematy
+                                </span>
+                                <span class="text-xs text-zinc-500">8</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 rounded hover:bg-zinc-800/50 cursor-pointer group text-sm text-zinc-300">
+                                <span class="flex items-center gap-2">
+                                    <iconify-icon icon="lucide:bookmark" class="text-zinc-500 group-hover:text-zinc-300"></iconify-icon>
+                                    Obserwowane
+                                </span>
+                                <span class="text-xs text-zinc-600">3</span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs font-semibold text-zinc-500 mb-3 tracking-wider uppercase">Ministerstwo</div>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <div class="w-4 h-4 rounded border border-zinc-700 bg-zinc-900 flex items-center justify-center transition-colors group-hover:border-zinc-500">
+                                    <iconify-icon icon="lucide:check" class="text-white opacity-0"></iconify-icon>
+                                </div>
+                                <span class="text-xs text-zinc-400 group-hover:text-zinc-300">Finansów</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <div class="w-4 h-4 rounded border border-zinc-700 bg-zinc-800 flex items-center justify-center">
+                                    <iconify-icon icon="lucide:check" class="text-white text-[10px]" width="10"></iconify-icon>
+                                </div>
+                                <span class="text-xs text-white">Sprawiedliwości</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <div class="w-4 h-4 rounded border border-zinc-700 bg-zinc-900 flex items-center justify-center transition-colors group-hover:border-zinc-500">
+                                    <iconify-icon icon="lucide:check" class="text-white opacity-0"></iconify-icon>
+                                </div>
+                                <span class="text-xs text-zinc-400 group-hover:text-zinc-300">Zdrowia</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Main List -->
+                    <div class="md:col-span-9 p-0 bg-zinc-900/10">
+                        <!-- Bill Item 1 (Active) -->
+                        <div class="p-5 border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors cursor-pointer group">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xxs font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">DRUK NR 321</span>
+                                    <span class="text-xxs font-medium text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full border border-blue-400/20">I Czytanie</span>
+                                </div>
+                                <span class="text-xs text-zinc-500">2 godz. temu</span>
+                            </div>
+                            <h3 class="text-sm font-medium text-zinc-200 mb-1 group-hover:text-white transition-colors">Projekt ustawy o zmianie ustawy o podatku dochodowym od osób fizycznych</h3>
+                            <p class="text-xs text-zinc-500 line-clamp-1">Celem projektu jest podwyższenie kwoty wolnej od podatku oraz zmiana progów podatkowych...</p>
+                            
+                            <!-- Mini Timeline inside Card -->
+                            <div class="mt-4 flex items-center gap-1 relative">
+                                <div class="h-0.5 w-full bg-zinc-800 absolute top-1.5 left-0 z-0"></div>
+                                <div class="relative z-10 flex w-full justify-between pr-10">
+                                    <div class="flex flex-col items-center gap-1">
+                                        <div class="w-3 h-3 rounded-full bg-blue-500 border-2 border-zinc-950 shadow-sm shadow-blue-500/50"></div>
+                                        <span class="text-[10px] text-zinc-400">Wpłynięcie</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <div class="w-3 h-3 rounded-full bg-blue-500 border-2 border-zinc-950 shadow-sm shadow-blue-500/50 animate-pulse"></div>
+                                        <span class="text-[10px] text-white font-medium">I Czytanie</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <div class="w-3 h-3 rounded-full bg-zinc-800 border-2 border-zinc-950"></div>
+                                        <span class="text-[10px] text-zinc-600">Komisja</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <div class="w-3 h-3 rounded-full bg-zinc-800 border-2 border-zinc-950"></div>
+                                        <span class="text-[10px] text-zinc-600 hidden sm:block">II Czytanie</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <div class="w-3 h-3 rounded-full bg-zinc-800 border-2 border-zinc-950"></div>
+                                        <span class="text-[10px] text-zinc-600 hidden sm:block">Senat</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bill Item 2 -->
+                        <div class="p-5 border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors cursor-pointer group opacity-70">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xxs font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">DRUK NR 105</span>
+                                    <span class="text-xxs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">Uchwalono</span>
+                                </div>
+                                <span class="text-xs text-zinc-500">Wczoraj</span>
+                            </div>
+                            <h3 class="text-sm font-medium text-zinc-200 mb-1 group-hover:text-white transition-colors">Rządowy projekt ustawy o ochronie ludności</h3>
+                            <p class="text-xs text-zinc-500 line-clamp-1">Projekt zakłada stworzenie nowego systemu ostrzegania i alarmowania ludności...</p>
+                        </div>
+                        
+                         <!-- Bill Item 3 -->
+                        <div class="p-5 border-b border-zinc-800/50 hover:bg-zinc-900/30 transition-colors cursor-pointer group opacity-70">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xxs font-mono text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">DRUK NR 219</span>
+                                    <span class="text-xxs font-medium text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded-full border border-purple-400/20">Senat</span>
+                                </div>
+                                <span class="text-xs text-zinc-500">2 dni temu</span>
+                            </div>
+                            <h3 class="text-sm font-medium text-zinc-200 mb-1 group-hover:text-white transition-colors">Poselski projekt ustawy o zmianie Kodeksu pracy</h3>
+                            <p class="text-xs text-zinc-500 line-clamp-1">Zmiany w zakresie pracy zdalnej oraz kontroli trzeźwości pracowników...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Grid -->
+    <section id="features" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="group p-6 rounded-2xl border border-zinc-800 bg-zinc-900/20 hover:bg-zinc-900/40 transition-all hover:border-zinc-700">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 text-white group-hover:text-blue-400 transition-colors">
+                        <iconify-icon icon="lucide:zap" width="20" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <h3 class="text-lg font-medium text-white mb-2">Real-time Updates</h3>
+                    <p class="text-sm text-zinc-400 leading-relaxed">
+                        Automatyczne pobieranie danych z oficjalnego API Sejmu RP oraz systemu ELI. Bądź na bieżąco z każdą zmianą statusu projektu w momencie jej publikacji.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="group p-6 rounded-2xl border border-zinc-800 bg-zinc-900/20 hover:bg-zinc-900/40 transition-all hover:border-zinc-700">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 text-white group-hover:text-emerald-400 transition-colors">
+                        <iconify-icon icon="lucide:git-pull-request" width="20" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <h3 class="text-lg font-medium text-white mb-2">Oś Czasu Legislacji</h3>
+                    <p class="text-sm text-zinc-400 leading-relaxed">
+                        Interaktywna wizualizacja ścieżki legislacyjnej. Od wpłynięcia projektu, przez czytania i komisje, aż do podpisu Prezydenta i publikacji w Dzienniku Ustaw.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="group p-6 rounded-2xl border border-zinc-800 bg-zinc-900/20 hover:bg-zinc-900/40 transition-all hover:border-zinc-700">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 text-white group-hover:text-purple-400 transition-colors">
+                        <iconify-icon icon="lucide:bell" width="20" stroke-width="1.5"></iconify-icon>
+                    </div>
+                    <h3 class="text-lg font-medium text-white mb-2">System Powiadomień</h3>
+                    <p class="text-sm text-zinc-400 leading-relaxed">
+                        Skonfiguruj alerty email dla konkretnych słów kluczowych, ministerstw lub konkretnych projektów ustaw. Nie przegap kluczowych głosowań.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detail Section: Filtering -->
+    <section class="py-24 border-t border-zinc-900 bg-zinc-950 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
+            <!-- Left: Content -->
+            <div>
+                <div class="inline-flex items-center gap-2 text-zinc-400 text-xs font-medium uppercase tracking-wider mb-6">
+                    <iconify-icon icon="lucide:filter" width="14"></iconify-icon>
+                    Zaawansowane Wyszukiwanie
+                </div>
+                <h2 class="text-3xl md:text-4xl font-medium text-white mb-6 tracking-tight">Znajdź to, co naprawdę<br>ma znaczenie.</h2>
+                <p class="text-zinc-400 mb-8 leading-relaxed max-w-md">
+                    Przeszukuj tysiące dokumentów sejmowych z precyzją chirurga. Filtruj po statusie, wnioskodawcy, datach czy typie dokumentu. Zapisuj filtry na swoim profilu użytkownika.
+                </p>
+                
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-start gap-3">
+                        <div class="mt-1 w-5 h-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white">
+                            <iconify-icon icon="lucide:check" width="12"></iconify-icon>
+                        </div>
+                        <div>
+                            <span class="block text-sm text-white font-medium">Inteligentne filtry</span>
+                            <span class="text-xs text-zinc-500">Grupowanie po kadencjach i typach druków.</span>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="mt-1 w-5 h-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white">
+                            <iconify-icon icon="lucide:check" width="12"></iconify-icon>
+                        </div>
+                        <div>
+                            <span class="block text-sm text-white font-medium">Eksport danych</span>
+                            <span class="text-xs text-zinc-500">Pobieraj wyniki wyszukiwania do CSV lub PDF.</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <button class="text-sm font-medium text-white border-b border-white pb-0.5 hover:text-zinc-300 hover:border-zinc-300 transition-colors">
+                    Zobacz jak to działa
+                </button>
+            </div>
+
+            <!-- Right: Visual -->
+            <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-purple-500/10 rounded-xl blur-3xl"></div>
+                <div class="relative glass-panel rounded-xl p-6 border border-zinc-800">
+                    
+                    <!-- Search Input Mock -->
+                    <div class="relative mb-6">
+                        <iconify-icon icon="lucide:search" class="absolute left-3 top-2.5 text-zinc-500" width="16"></iconify-icon>
+                        <input type="text" value="Podatek VAT" disabled="" class="w-full bg-zinc-900 border border-zinc-700 text-zinc-300 text-sm rounded-md py-2 pl-10 pr-4 focus:outline-none cursor-not-allowed">
+                        <div class="absolute right-2 top-2 px-1.5 py-0.5 bg-zinc-800 rounded border border-zinc-700 text-xxs text-zinc-400 font-mono">CMD+K</div>
+                    </div>
+
+                    <!-- Tags/Filters Mock -->
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <div class="px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 flex items-center gap-2">
+                            Status: Procedowane
+                            <iconify-icon icon="lucide:x" width="10" class="cursor-pointer hover:text-white"></iconify-icon>
+                        </div>
+                        <div class="px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 flex items-center gap-2">
+                            Druk: Rządowy
+                            <iconify-icon icon="lucide:x" width="10" class="cursor-pointer hover:text-white"></iconify-icon>
+                        </div>
+                        <div class="px-3 py-1 rounded-full border border-dashed border-zinc-700 text-xs text-zinc-500 flex items-center gap-1 cursor-pointer hover:text-zinc-300 hover:border-zinc-500 transition-colors">
+                            <iconify-icon icon="lucide:plus" width="12"></iconify-icon>
+                            Dodaj filtr
+                        </div>
+                    </div>
+
+                    <!-- Results List Mock -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-800/50 transition-colors border border-transparent hover:border-zinc-800">
+                            <div class="w-8 h-8 rounded bg-blue-900/20 flex items-center justify-center text-blue-400">
+                                <iconify-icon icon="lucide:file-text" width="16"></iconify-icon>
+                            </div>
+                            <div class="flex-1">
+                                <div class="h-2 w-3/4 bg-zinc-800 rounded mb-2"></div>
+                                <div class="h-1.5 w-1/2 bg-zinc-800/60 rounded"></div>
+                            </div>
+                            <div class="text-xs text-zinc-500">Dziś</div>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-800/50 transition-colors border border-transparent hover:border-zinc-800">
+                            <div class="w-8 h-8 rounded bg-purple-900/20 flex items-center justify-center text-purple-400">
+                                <iconify-icon icon="lucide:file-text" width="16"></iconify-icon>
+                            </div>
+                            <div class="flex-1">
+                                <div class="h-2 w-2/3 bg-zinc-800 rounded mb-2"></div>
+                                <div class="h-1.5 w-1/3 bg-zinc-800/60 rounded"></div>
+                            </div>
+                            <div class="text-xs text-zinc-500">2 dni</div>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-800/50 transition-colors border border-transparent hover:border-zinc-800">
+                            <div class="w-8 h-8 rounded bg-emerald-900/20 flex items-center justify-center text-emerald-400">
+                                <iconify-icon icon="lucide:file-text" width="16"></iconify-icon>
+                            </div>
+                            <div class="flex-1">
+                                <div class="h-2 w-4/5 bg-zinc-800 rounded mb-2"></div>
+                                <div class="h-1.5 w-2/5 bg-zinc-800/60 rounded"></div>
+                            </div>
+                            <div class="text-xs text-zinc-500">1 tydz.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-20 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="text-3xl font-semibold text-white mb-1 tracking-tight">X. kadencja</div>
+                    <div class="text-xs text-zinc-500 uppercase tracking-wide">Obecna kadencja</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-semibold text-white mb-1 tracking-tight">460</div>
+                    <div class="text-xs text-zinc-500 uppercase tracking-wide">Posłów</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-semibold text-white mb-1 tracking-tight">120+</div>
+                    <div class="text-xs text-zinc-500 uppercase tracking-wide">Projektów ustaw / msc</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-semibold text-white mb-1 tracking-tight">24/7</div>
+                    <div class="text-xs text-zinc-500 uppercase tracking-wide">Monitoring</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-32 relative overflow-hidden">
+        <!-- Radial gradient background -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-800/20 via-zinc-950 to-zinc-950"></div>
+        
+        <div class="max-w-3xl mx-auto px-6 text-center relative z-10">
+            <h2 class="text-4xl md:text-5xl font-medium text-white mb-6 tracking-tight">Bądź świadomym obywatelem.</h2>
+            <p class="text-zinc-400 mb-10 text-lg font-light">
+                Dołącz do tysięcy osób, które śledzą zmiany w prawie zanim wejdą w życie. Załóż darmowe konto i skonfiguruj swoje pierwsze powiadomienie.
+            </p>
+            
+            <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <input type="email" placeholder="Twój adres email" class="flex-1 h-12 bg-zinc-900 border border-zinc-700 rounded-lg px-4 text-sm text-white focus:outline-none focus:border-zinc-500 transition-colors placeholder:text-zinc-600">
+                <button type="submit" class="h-12 px-6 bg-white text-zinc-950 rounded-lg font-medium text-sm hover:bg-zinc-200 transition-colors whitespace-nowrap">
+                    Załóż konto
+                </button>
+            </form>
+            <p class="text-xxs text-zinc-600 mt-4">Nie wysyłamy spamu. Możesz zrezygnować w każdej chwili.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-900 py-12 bg-zinc-950">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start gap-12">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-4 h-4 bg-zinc-800 rounded-full flex items-center justify-center">
+                        <div class="w-1.5 h-1.5 bg-zinc-400 rounded-full"></div>
+                    </div>
+                    <span class="text-sm font-semibold tracking-tighter text-zinc-300">LEGISLATURA</span>
+                </div>
+                <p class="text-xs text-zinc-500 max-w-xs leading-relaxed">
+                    Platforma niezależna, niepowiązana bezpośrednio z organami administracji państwowej. Dane pochodzą z publicznych API Sejmu RP.
+                </p>
+            </div>
+            
+            <div class="flex gap-16">
+                <div>
+                    <h4 class="text-xs font-semibold text-white mb-4">Platforma</h4>
+                    <ul class="space-y-2 text-xs text-zinc-500">
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">Projekty ustaw</a></li>
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">Kalendarz posiedzeń</a></li>
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">Transmisje</a></li>
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xs font-semibold text-white mb-4">Firma</h4>
+                    <ul class="space-y-2 text-xs text-zinc-500">
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">O nas</a></li>
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">Kontakt</a></li>
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">Regulamin</a></li>
+                        <li><a href="#" class="hover:text-zinc-300 transition-colors">Polityka prywatności</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-zinc-900 flex justify-between items-center">
+            <span class="text-xxs text-zinc-600">© 2023 Legislatura PL. Wszelkie prawa zastrzeżone.</span>
+            <div class="flex gap-4">
+                <iconify-icon icon="lucide:twitter" width="14" class="text-zinc-600 hover:text-zinc-400 cursor-pointer"></iconify-icon>
+                <iconify-icon icon="lucide:github" width="14" class="text-zinc-600 hover:text-zinc-400 cursor-pointer"></iconify-icon>
+            </div>
+        </div>
+    </footer>
+
+
+</body></html>
