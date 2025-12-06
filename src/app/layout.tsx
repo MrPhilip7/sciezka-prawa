@@ -33,7 +33,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider defaultTheme="system" storageKey="sciezka-prawa-theme">
+        <ThemeProvider defaultTheme="dark" storageKey="sciezka-prawa-theme">
           <AccessibilityProvider>
             {/* Skip link dla nawigacji klawiaturowej */}
             <a href="#main-content" className="skip-link">

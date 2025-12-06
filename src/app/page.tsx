@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { LandingBillsDemo } from '@/components/landing/landing-bills-demo'
+import { LandingThemeToggle } from '@/components/landing/landing-theme-toggle'
 import {
   Scale,
   Search,
@@ -66,7 +67,8 @@ export default async function HomePage() {
             <a href="#about" className="hover:text-foreground transition-colors">O projekcie</a>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <LandingThemeToggle />
             <Link href="/login" className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
               Zaloguj się
             </Link>
