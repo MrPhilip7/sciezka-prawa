@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
 
   try {
     if (proposalId) {
-      const { data: proposal, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: proposal, error } = await (supabase as any)
         .from('amendment_proposals')
         .select(`
           *,
@@ -48,7 +49,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (billId) {
-      const { data: proposals, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: proposals, error } = await (supabase as any)
         .from('amendment_proposals')
         .select(`
           id,
@@ -70,15 +72,16 @@ export async function GET(request: NextRequest) {
 
       // Policz głosy dla każdej propozycji
       const proposalsWithVotes = await Promise.all(
-        (proposals || []).map(async (proposal) => {
-          const { data: votes } = await supabase
+        (proposals || []).map(async (proposal: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: votes } = await (supabase as any)
             .from('proposal_votes')
             .select('vote')
             .eq('proposal_id', proposal.id)
 
-          const supportCount = votes?.filter(v => v.vote === 'support').length || 0
-          const opposeCount = votes?.filter(v => v.vote === 'oppose').length || 0
-          const neutralCount = votes?.filter(v => v.vote === 'neutral').length || 0
+          const supportCount = votes?.filter((v: { vote: string }) => v.vote === 'support').length || 0
+          const opposeCount = votes?.filter((v: { vote: string }) => v.vote === 'oppose').length || 0
+          const neutralCount = votes?.filter((v: { vote: string }) => v.vote === 'neutral').length || 0
 
           return {
             ...proposal,
@@ -123,7 +126,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Utwórz propozycję
-    const { data: proposal, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: proposal, error } = await (supabase as any)
       .from('amendment_proposals')
       .insert({
         bill_id: billId,
@@ -182,7 +186,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Zaktualizuj status
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from('amendment_proposals')
       .update({ status })
       .eq('id', proposalId)
@@ -215,7 +220,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Pobierz propozycję
-    const { data: proposal, error: fetchError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: proposal, error: fetchError } = await (supabase as any)
       .from('amendment_proposals')
       .select('author_id')
       .eq('id', proposalId)
@@ -240,7 +246,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Usuń propozycję (kaskadowo usuwa głosy)
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from('amendment_proposals')
       .delete()
       .eq('id', proposalId)

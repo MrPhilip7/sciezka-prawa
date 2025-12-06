@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Sprawdź czy ankieta jest aktywna
-    const { data: survey, error: surveyError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: survey, error: surveyError } = await (supabase as any)
       .from('consultation_surveys')
       .select('id, status, ends_at, is_anonymous')
       .eq('id', surveyId)
@@ -41,7 +42,8 @@ export async function POST(request: NextRequest) {
 
     // Sprawdź czy użytkownik już nie odpowiedział (jeśli nie anonimowo)
     if (user && !isAnonymous) {
-      const { data: existing } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: existing } = await (supabase as any)
         .from('survey_responses')
         .select('id')
         .eq('survey_id', surveyId)
@@ -54,7 +56,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Utwórz response
-    const { data: response, error: responseError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: response, error: responseError } = await (supabase as any)
       .from('survey_responses')
       .insert({
         survey_id: surveyId,
@@ -76,13 +79,15 @@ export async function POST(request: NextRequest) {
       rating_value: answer.ratingValue || null
     }))
 
-    const { error: answersError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: answersError } = await (supabase as any)
       .from('survey_answers')
       .insert(answersToInsert)
 
     if (answersError) {
       // Usuń response jeśli nie udało się dodać odpowiedzi
-      await supabase.from('survey_responses').delete().eq('id', response.id)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('survey_responses').delete().eq('id', response.id)
       return NextResponse.json({ error: answersError.message }, { status: 400 })
     }
 

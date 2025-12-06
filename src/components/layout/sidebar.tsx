@@ -30,8 +30,17 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 
+// Navigation item type
+interface NavItem {
+  name: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  badge?: string
+  requiresAuth: boolean
+}
+
 // Items available to everyone
-const publicNavigation = [
+const publicNavigation: NavItem[] = [
   {
     name: 'Panel',
     href: '/dashboard',
@@ -53,7 +62,7 @@ const publicNavigation = [
 ]
 
 // Items that require login
-const authRequiredNavigation = [
+const authRequiredNavigation: NavItem[] = [
   {
     name: 'Wyszukiwarka',
     href: '/search',
@@ -82,7 +91,7 @@ const authRequiredNavigation = [
   },
 ]
 
-const secondaryNavigation = [
+const secondaryNavigation: NavItem[] = [
   {
     name: 'Ustawienia',
     href: '/settings',

@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Sprawdź czy propozycja jest w fazie głosowania
-    const { data: proposal, error: proposalError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: proposal, error: proposalError } = await (supabase as any)
       .from('amendment_proposals')
       .select('status, voting_ends_at')
       .eq('id', proposalId)
@@ -39,7 +40,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Dodaj lub zaktualizuj głos (upsert)
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from('proposal_votes')
       .upsert({
         proposal_id: proposalId,
@@ -77,7 +79,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Missing proposalId' }, { status: 400 })
     }
 
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from('proposal_votes')
       .delete()
       .eq('proposal_id', proposalId)

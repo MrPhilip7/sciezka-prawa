@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
   try {
     // Pobierz konkretną ankietę z pytaniami
     if (surveyId) {
-      const { data: survey, error: surveyError } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: survey, error: surveyError } = await (supabase as any)
         .from('consultation_surveys')
         .select(`
           *,
@@ -34,7 +35,8 @@ export async function GET(request: NextRequest) {
       }
 
       // Policz odpowiedzi
-      const { count } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count } = await (supabase as any)
         .from('survey_responses')
         .select('*', { count: 'exact', head: true })
         .eq('survey_id', surveyId)
@@ -42,13 +44,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...survey,
         response_count: count || 0,
-        questions: survey.questions?.sort((a, b) => a.order_index - b.order_index) || []
+        questions: survey.questions?.sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index) || []
       })
     }
 
     // Pobierz ankiety dla ustawy
     if (billId) {
-      const { data: surveys, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: surveys, error } = await (supabase as any)
         .from('consultation_surveys')
         .select(`
           id,
@@ -71,8 +74,9 @@ export async function GET(request: NextRequest) {
 
       // Policz odpowiedzi dla każdej ankiety
       const surveysWithCounts = await Promise.all(
-        (surveys || []).map(async (survey) => {
-          const { count } = await supabase
+        (surveys || []).map(async (survey: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { count } = await (supabase as any)
             .from('survey_responses')
             .select('*', { count: 'exact', head: true })
             .eq('survey_id', survey.id)
@@ -121,7 +125,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Utwórz ankietę
-    const { data: survey, error: surveyError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: survey, error: surveyError } = await (supabase as any)
       .from('consultation_surveys')
       .insert({
         bill_id: billId,
@@ -150,13 +155,15 @@ export async function POST(request: NextRequest) {
       options: q.options || null
     }))
 
-    const { error: questionsError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: questionsError } = await (supabase as any)
       .from('survey_questions')
       .insert(questionsToInsert)
 
     if (questionsError) {
       // Usuń ankietę jeśli nie udało się dodać pytań
-      await supabase.from('consultation_surveys').delete().eq('id', survey.id)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('consultation_surveys').delete().eq('id', survey.id)
       return NextResponse.json({ error: questionsError.message }, { status: 400 })
     }
 
