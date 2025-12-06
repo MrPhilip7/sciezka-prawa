@@ -26,6 +26,8 @@ import {
   Vote,
   Users,
   MessageSquare,
+  ClipboardList,
+  TrendingUp,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Bill, BillEvent } from '@/types/supabase'
@@ -37,6 +39,8 @@ import { LegislativeTrain } from '@/components/bills/legislative-train-enhanced'
 import { ImpactAssessmentViewer as ImpactAssessmentViewerEnhanced } from '@/components/bills/impact-assessment-enhanced'
 import { AlertButton } from '@/components/bills/alert-button'
 import { ConsultationForum } from '@/components/bills/consultation-forum'
+import { SurveyViewer } from '@/components/bills/survey-viewer'
+import { ProposalList } from '@/components/bills/proposal-list'
 
 // Types for voting data
 interface ClubVotingStats {
@@ -433,7 +437,15 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
           </TabsTrigger>
           <TabsTrigger value="consultations" className="gap-1.5">
             <MessageSquare className="h-4 w-4" />
-            Konsultacje
+            Forum
+          </TabsTrigger>
+          <TabsTrigger value="surveys" className="gap-1.5">
+            <ClipboardList className="h-4 w-4" />
+            Ankiety
+          </TabsTrigger>
+          <TabsTrigger value="proposals" className="gap-1.5">
+            <TrendingUp className="h-4 w-4" />
+            Propozycje
           </TabsTrigger>
           <TabsTrigger value="timeline">Historia ({events.length})</TabsTrigger>
         </TabsList>
@@ -765,7 +777,104 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
             isLoggedIn={isLoggedIn}
           />
         </TabsContent>
+
+        {/* Surveys Tab */}
+        <TabsContent value="surveys" className="space-y-6">
+          {isLoggedIn ? (
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ClipboardList className="h-5 w-5" />
+                    Ankiety konsultacyjne
+                  </CardTitle>
+                  <CardDescription>
+                    Weź udział w ankietach dotyczących tej ustawy i podziel się swoją opinią
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+              {/* Lista ankiet zostanie załadowana dynamicznie przez API */}
+              <SurveysListContainer billId={bill.id} />
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <ClipboardList className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-xl font-semibold mb-2">Zaloguj się, aby wziąć udział w ankietach</h3>
+                <p className="text-muted-foreground mb-4">
+                  Ankiety pozwalają na wyrażenie opinii i wpłynięcie na kształt ustawy
+                </p>
+                <Button asChild>
+                  <Link href="/login">Zaloguj się</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Proposals Tab */}
+        <TabsContent value="proposals">
+          <ProposalList
+            billId={bill.id}
+            isLoggedIn={isLoggedIn}
+          />
+        </TabsContent>
       </Tabs>
+    </div>
+  )
+}
+
+// Komponent pomocniczy do ładowania listy ankiet
+function SurveysListContainer({ billId }: { billId: string }) {
+  const [surveys, setSurveys] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchSurveys = async () => {
+      try {
+        const res = await fetch(`/api/surveys?billId=${billId}`)
+        const data = await res.json()
+        if (res.ok) {
+          setSurveys(data)
+        }
+      } catch (error) {
+        console.error('Błąd pobierania ankiet:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchSurveys()
+  }, [billId])
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          Ładowanie ankiet...
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (surveys.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <ClipboardList className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <h3 className="text-xl font-semibold mb-2">Brak aktywnych ankiet</h3>
+          <p className="text-muted-foreground">
+            Ankiety będą dostępne, gdy ustawa wejdzie w fazę konsultacji społecznych
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {surveys.map((survey) => (
+        <SurveyViewer key={survey.id} surveyId={survey.id} />
+      ))}
     </div>
   )
 }

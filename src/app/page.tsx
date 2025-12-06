@@ -356,6 +356,15 @@ export default async function HomePage() {
                 </li>
               </ul>
             </div>
+            <div>
+              <h4 className="text-xs font-semibold text-foreground mb-4">Informacje prawne</h4>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li><Link href="/policies/terms" className="hover:text-foreground transition-colors">Regulamin</Link></li>
+                <li><Link href="/policies/privacy" className="hover:text-foreground transition-colors">Polityka prywatności</Link></li>
+                <li><Link href="/policies/accessibility" className="hover:text-foreground transition-colors">Deklaracja dostępności</Link></li>
+                <li><Link href="/help" className="hover:text-foreground transition-colors">Centrum pomocy</Link></li>
+              </ul>
+            </div>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-border flex justify-between items-center">

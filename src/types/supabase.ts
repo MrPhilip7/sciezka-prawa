@@ -454,3 +454,11 @@ export type AdminLog = Tables<'admin_logs'>
 export type SystemSetting = Tables<'system_settings'>
 export type ConsultationComment = Tables<'consultation_comments'>
 export type ConsultationCommentReaction = Tables<'consultation_comment_reactions'>
+
+// Participation mechanisms types (added from migration 005)
+export type SurveyQuestionType = 'single_choice' | 'multiple_choice' | 'text' | 'rating' | 'yes_no'
+export type SurveyStatus = 'draft' | 'active' | 'closed' | 'archived'
+export type ProposalStatus = 'draft' | 'voting' | 'accepted' | 'rejected' | 'implemented'
+export type VoteType = 'support' | 'oppose' | 'neutral'
+export type WorkshopStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
+export type PracticeCategory = 'consultation' | 'participation' | 'transparency' | 'accessibility' | 'communication'
