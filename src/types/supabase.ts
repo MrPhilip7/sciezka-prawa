@@ -328,6 +328,103 @@ export type Database = {
           }
         ]
       }
+      consultation_comments: {
+        Row: {
+          id: string
+          bill_id: string
+          user_id: string
+          parent_comment_id: string | null
+          content: string
+          is_edited: boolean
+          edited_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          bill_id: string
+          user_id: string
+          parent_comment_id?: string | null
+          content: string
+          is_edited?: boolean
+          edited_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          bill_id?: string
+          user_id?: string
+          parent_comment_id?: string | null
+          content?: string
+          is_edited?: boolean
+          edited_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_comments_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_comments"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      consultation_comment_reactions: {
+        Row: {
+          id: string
+          comment_id: string
+          user_id: string
+          reaction_type: 'like' | 'support' | 'insightful'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          comment_id: string
+          user_id: string
+          reaction_type: 'like' | 'support' | 'insightful'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          comment_id?: string
+          user_id?: string
+          reaction_type?: 'like' | 'support' | 'insightful'
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_comment_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -355,3 +452,5 @@ export type SavedSearch = Tables<'saved_searches'>
 export type Profile = Tables<'profiles'>
 export type AdminLog = Tables<'admin_logs'>
 export type SystemSetting = Tables<'system_settings'>
+export type ConsultationComment = Tables<'consultation_comments'>
+export type ConsultationCommentReaction = Tables<'consultation_comment_reactions'>

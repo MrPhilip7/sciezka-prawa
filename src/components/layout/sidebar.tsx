@@ -25,6 +25,7 @@ import {
   Calendar,
   Shield,
   Lock,
+  MessageSquare,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
@@ -44,10 +45,16 @@ const publicNavigation = [
     requiresAuth: false,
   },
   {
+    name: 'Konsultacje',
+    href: '/consultations',
+    icon: MessageSquare,
+    badge: 'Nowy',
+    requiresAuth: false,
+  },
+  {
     name: 'Kalendarz',
     href: '/calendar',
     icon: Calendar,
-    badge: 'Nowy',
     requiresAuth: false,
   },
 ]

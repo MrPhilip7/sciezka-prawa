@@ -25,6 +25,7 @@ import {
   XCircle,
   Vote,
   Users,
+  MessageSquare,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Bill, BillEvent } from '@/types/supabase'
@@ -32,6 +33,10 @@ import { toast } from 'sonner'
 import { LegislativeTimeline } from '@/components/bills/legislative-timeline'
 import { SimpleLanguageHelper } from '@/components/bills/simple-language-helper'
 import { ImpactAssessmentViewer } from '@/components/bills/impact-assessment-viewer'
+import { LegislativeTrain } from '@/components/bills/legislative-train-enhanced'
+import { ImpactAssessmentViewer as ImpactAssessmentViewerEnhanced } from '@/components/bills/impact-assessment-enhanced'
+import { AlertButton } from '@/components/bills/alert-button'
+import { ConsultationForum } from '@/components/bills/consultation-forum'
 
 // Types for voting data
 interface ClubVotingStats {
@@ -426,6 +431,10 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
             <Vote className="h-4 w-4" />
             Głosowania
           </TabsTrigger>
+          <TabsTrigger value="consultations" className="gap-1.5">
+            <MessageSquare className="h-4 w-4" />
+            Konsultacje
+          </TabsTrigger>
           <TabsTrigger value="timeline">Historia ({events.length})</TabsTrigger>
         </TabsList>
 
@@ -746,6 +755,16 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
             )}
           </TabsContent>
         )}
+
+        {/* Consultations Forum Tab */}
+        <TabsContent value="consultations">
+          <ConsultationForum
+            billId={bill.id}
+            billTitle={bill.title}
+            billStatus={bill.status}
+            isLoggedIn={isLoggedIn}
+          />
+        </TabsContent>
       </Tabs>
     </div>
   )

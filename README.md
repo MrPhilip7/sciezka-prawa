@@ -18,7 +18,16 @@
 - **Alerts System** - Powiadomienia email o zmianach w śledzonych projektach
 - **User Profiles** - Personalizowane konto z zapisanymi wyszukiwaniami
 
-### ✨ NOWE w Fazie 1 (6 grudnia 2025)
+### ✨ NOWE w Fazie 2 (Grudzień 2024) - Integracja RCL
+- **🔗 Integracja RCL** - Automatyczne łączenie danych z Rządowego Centrum Legislacji
+- **📋 Strona Konsultacji** - Dedykowany widok `/consultations` z aktywnymi konsultacjami i prekonsultacjami
+- **🔔 Ulepszone Alerty** - Konfigurowalny system powiadomień (email/push) dla konkretnych ustaw
+- **📊 Szczegółowa Ocena Skutków (OSR)** - Wizualizacja wpływu finansowego, społecznego, gospodarczego i środowiskowego
+- **🚂 Legislative Train** - Interaktywna wizualizacja ścieżki legislacyjnej na wzór EU Legislative Train Schedule
+- **📅 Monitoring Konsultacji** - Śledzenie aktywnych, nadchodzących i zakończonych konsultacji społecznych
+- **🎯 Impact Analysis** - Szczegółowa analiza przewidywanych skutków regulacji
+
+### ✨ Faza 1 (6 grudnia 2025)
 - **📊 Wizualizacja Ścieżki Legislacyjnej** - Graficzny timeline procesu od współtworzenia do publikacji
 - **🗣️ Prosty Język** - AI tłumaczy skomplikowane teksty prawne na zrozumiały język
 - **📈 Analiza Skutków** - Pokazuje jak ustawa wpłynie na obywateli, firmy i budżet
@@ -26,7 +35,7 @@
 - **🤝 Prekonsultacje** - Śledzenie etapu konsultacji społecznych przed Sejmem
 - **🏛️ Współtworzenie** - Monitoring wczesnych etapów partycypacji obywatelskiej
 
-> Zgodne z ZALECENIEM KOMISJI EUROPEJSKIEJ z dnia 12.12.2023 r. w sprawie zaangażowania obywateli
+> Zgodne z ZALECENIEM KOMISJI EUROPEJSKIEJ z dnia 12.12.2023 r. w sprawie zaangażowania obywateli i projekt.md (Ministerstwo Cyfryzacji)
 
 ## 🛠️ Tech Stack
 
