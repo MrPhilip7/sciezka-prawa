@@ -168,30 +168,34 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h3 className="font-semibold">Powiadomienia</h3>
+      <PopoverContent 
+        className="w-[calc(100vw-2rem)] sm:w-80 max-w-[400px] p-0" 
+        align="end"
+        sideOffset={8}
+      >
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b">
+          <h3 className="font-semibold text-sm sm:text-base">Powiadomienia</h3>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
               onClick={markAllAsRead}
-              className="text-xs h-7"
+              className="text-xs h-7 px-2"
             >
-              <CheckCheck className="h-3 w-3 mr-1" />
-              Oznacz wszystkie
+              <CheckCheck className="h-3 w-3 sm:mr-1" />
+              <span className="hidden sm:inline">Oznacz wszystkie</span>
             </Button>
           )}
         </div>
 
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[60vh] sm:h-[400px] max-h-[500px]">
           {loading && notifications.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-              <Bell className="h-10 w-10 text-muted-foreground mb-2" />
+              <Bell className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
                 Brak powiadomień
               </p>
@@ -207,27 +211,27 @@ export function NotificationBell() {
                 return (
                   <div
                     key={notification.id}
-                    className={`p-3 hover:bg-muted/50 transition-colors ${
+                    className={`p-2.5 sm:p-3 hover:bg-muted/50 transition-colors ${
                       !notification.is_read ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
                     }`}
                   >
-                    <div className="flex gap-3">
-                      <span className="text-xl flex-shrink-0">
+                    <div className="flex gap-2 sm:gap-3">
+                      <span className="text-lg sm:text-xl flex-shrink-0">
                         {getNotificationIcon(notification.type)}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className={`text-sm font-medium truncate ${
+                        <div className="flex items-start justify-between gap-1 sm:gap-2">
+                          <p className={`text-xs sm:text-sm font-medium line-clamp-2 sm:truncate ${
                             !notification.is_read ? 'text-foreground' : 'text-muted-foreground'
                           }`}>
                             {notification.title}
                           </p>
-                          <div className="flex items-center gap-1 flex-shrink-0">
+                          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                             {!notification.is_read && (
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6"
+                                className="h-6 w-6 touch-manipulation"
                                 onClick={() => markAsRead(notification.id)}
                                 title="Oznacz jako przeczytane"
                               >
@@ -237,7 +241,7 @@ export function NotificationBell() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                              className="h-6 w-6 text-muted-foreground hover:text-destructive touch-manipulation"
                               onClick={() => deleteNotification(notification.id)}
                               title="Usuń"
                             >
@@ -245,11 +249,11 @@ export function NotificationBell() {
                             </Button>
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 line-clamp-2">
                           {notification.message}
                         </p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-muted-foreground">
+                        <div className="flex items-center justify-between mt-1.5 sm:mt-2">
+                          <span className="text-[10px] sm:text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(notification.created_at), {
                               addSuffix: true,
                               locale: pl,
@@ -264,10 +268,10 @@ export function NotificationBell() {
                                 }
                                 setOpen(false)
                               }}
-                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                              className="text-[10px] sm:text-xs text-primary hover:underline flex items-center gap-1 touch-manipulation"
                             >
                               Zobacz
-                              <ExternalLink className="h-3 w-3" />
+                              <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                             </Link>
                           )}
                         </div>
@@ -281,11 +285,11 @@ export function NotificationBell() {
         </ScrollArea>
 
         {notifications.length > 0 && (
-          <div className="border-t px-4 py-2">
+          <div className="border-t px-3 sm:px-4 py-2">
             <Link
               href="/alerts"
               onClick={() => setOpen(false)}
-              className="text-xs text-primary hover:underline"
+              className="text-xs text-primary hover:underline touch-manipulation"
             >
               Zarządzaj alertami →
             </Link>

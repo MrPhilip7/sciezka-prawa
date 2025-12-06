@@ -39,6 +39,9 @@ interface YouTubeLiveData {
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  co_creation: { label: 'Współtworzenie', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200', icon: FileText },
+  preconsultation: { label: 'Prekonsultacje', color: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200', icon: FileText },
+  consultation: { label: 'Konsultacje', color: 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200', icon: FileText },
   draft: { label: 'Projekt', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', icon: FileText },
   submitted: { label: 'Złożony', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', icon: FileSearch },
   first_reading: { label: 'I Czytanie', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200', icon: FileText },
