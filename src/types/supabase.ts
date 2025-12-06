@@ -15,7 +15,7 @@ export type Database = {
           sejm_id: string
           title: string
           description: string | null
-          status: 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
+          status: 'co_creation' | 'preconsultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
           ministry: string | null
           submission_date: string | null
           last_updated: string
@@ -31,6 +31,12 @@ export type Database = {
           hidden_at: string | null
           hidden_reason: string | null
           last_edited_by: string | null
+          rcl_id: string | null
+          consultation_start_date: string | null
+          consultation_end_date: string | null
+          consultation_url: string | null
+          impact_assessment_url: string | null
+          simple_language_summary: string | null
           created_at: string
           updated_at: string
         }
@@ -39,7 +45,7 @@ export type Database = {
           sejm_id: string
           title: string
           description?: string | null
-          status?: 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
+          status?: 'co_creation' | 'preconsultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
           ministry?: string | null
           submission_date?: string | null
           last_updated?: string
@@ -50,6 +56,12 @@ export type Database = {
           term?: number | null
           tags?: string[] | null
           submission_year?: number | null
+          rcl_id?: string | null
+          consultation_start_date?: string | null
+          consultation_end_date?: string | null
+          consultation_url?: string | null
+          impact_assessment_url?: string | null
+          simple_language_summary?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -58,7 +70,7 @@ export type Database = {
           sejm_id?: string
           title?: string
           description?: string | null
-          status?: 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
+          status?: 'co_creation' | 'preconsultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
           ministry?: string | null
           submission_date?: string | null
           last_updated?: string
@@ -69,6 +81,12 @@ export type Database = {
           term?: number | null
           tags?: string[] | null
           submission_year?: number | null
+          rcl_id?: string | null
+          consultation_start_date?: string | null
+          consultation_end_date?: string | null
+          consultation_url?: string | null
+          impact_assessment_url?: string | null
+          simple_language_summary?: string | null
           created_at?: string
           updated_at?: string
         }

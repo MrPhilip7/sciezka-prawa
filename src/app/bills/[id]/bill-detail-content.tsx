@@ -29,6 +29,8 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import type { Bill, BillEvent } from '@/types/supabase'
 import { toast } from 'sonner'
+import { LegislativeTimeline } from '@/components/bills/legislative-timeline'
+import { SimpleLanguageHelper } from '@/components/bills/simple-language-helper'
 
 // Types for voting data
 interface ClubVotingStats {
@@ -64,15 +66,17 @@ interface BillDetailContentProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string; step: number }> = {
-  draft: { label: 'Projekt', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', step: 0 },
-  submitted: { label: 'Złożony', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', step: 1 },
-  first_reading: { label: 'I Czytanie', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200', step: 2 },
-  committee: { label: 'Komisja', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', step: 3 },
-  second_reading: { label: 'II Czytanie', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', step: 4 },
-  third_reading: { label: 'III Czytanie', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', step: 5 },
-  senate: { label: 'Senat', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200', step: 6 },
-  presidential: { label: 'Prezydent', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200', step: 7 },
-  published: { label: 'Opublikowana', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', step: 8 },
+  co_creation: { label: 'Współtworzenie', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200', step: 0 },
+  preconsultation: { label: 'Prekonsultacje', color: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200', step: 1 },
+  draft: { label: 'Projekt', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', step: 2 },
+  submitted: { label: 'Złożony', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', step: 3 },
+  first_reading: { label: 'I Czytanie', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200', step: 4 },
+  committee: { label: 'Komisja', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', step: 5 },
+  second_reading: { label: 'II Czytanie', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', step: 6 },
+  third_reading: { label: 'III Czytanie', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', step: 7 },
+  senate: { label: 'Senat', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200', step: 8 },
+  presidential: { label: 'Prezydent', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200', step: 9 },
+  published: { label: 'Opublikowana', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', step: 10 },
   rejected: { label: 'Odrzucona', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', step: -1 },
 }
 
@@ -434,7 +438,9 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
       }}>
         <TabsList>
           <TabsTrigger value="details">Szczegóły</TabsTrigger>
+          <TabsTrigger value="legislative-path">Ścieżka Legislacyjna</TabsTrigger>
           <TabsTrigger value="timeline">Historia ({events.length})</TabsTrigger>
+          <TabsTrigger value="simple-language">Prosty Język</TabsTrigger>
           <TabsTrigger value="votings" className="gap-1.5">
             <Vote className="h-4 w-4" />
             Głosowania
@@ -523,6 +529,16 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
           </Card>
         </TabsContent>
 
+        <TabsContent value="legislative-path">
+          <LegislativeTimeline
+            billStatus={bill.status}
+            events={events}
+            submissionDate={bill.submission_date}
+            consultationStartDate={bill.consultation_start_date}
+            consultationEndDate={bill.consultation_end_date}
+          />
+        </TabsContent>
+
         <TabsContent value="timeline">
           <Card>
             <CardHeader>
@@ -563,6 +579,13 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="simple-language">
+          <SimpleLanguageHelper
+            text={bill.description || bill.title}
+            title={bill.title}
+          />
         </TabsContent>
 
         <TabsContent value="votings">

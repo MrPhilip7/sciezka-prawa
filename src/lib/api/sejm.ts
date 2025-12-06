@@ -399,6 +399,18 @@ export function getStatusFromStages(stages: SejmProcessStage[]): string {
     return 'first_reading'
   }
   
+  // Prekonsultacje / konsultacje społeczne
+  if (name.includes('prekonsultacj') || name.includes('pre-konsultacj') ||
+      name.includes('konsultacj społeczn') || stageType.includes('preconsultation')) {
+    return 'preconsultation'
+  }
+  
+  // Współtworzenie
+  if (name.includes('współtworzen') || name.includes('wspoltworzenie') ||
+      name.includes('partycypacj') || stageType.includes('co_creation')) {
+    return 'co_creation'
+  }
+  
   // Projekt wpłynął
   if (name.includes('wpłynął') || name.includes('złożon') || 
       stageType === 'start' || stageType.includes('submitted')) {
