@@ -25,6 +25,7 @@ import {
   Scale,
 } from 'lucide-react'
 import { signout } from '@/app/auth/actions'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 interface HeaderProps {
   user: User | null
@@ -109,13 +110,8 @@ export function Header({ user, onMenuClick }: HeaderProps) {
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              {/* Notifications */}
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/alerts">
-                  <Bell className="h-5 w-5" />
-                  <span className="sr-only">Powiadomienia</span>
-                </Link>
-              </Button>
+              {/* Notifications Bell with Popover */}
+              <NotificationBell />
 
               {/* User menu */}
               <DropdownMenu>
