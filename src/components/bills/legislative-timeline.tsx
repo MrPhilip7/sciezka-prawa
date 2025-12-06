@@ -33,10 +33,8 @@ interface LegislativeTimelineProps {
   consultationEndDate?: string | null
 }
 
+// Etapy formalnego procesu legislacyjnego w Sejmie
 const statusOrder = [
-  'co_creation',
-  'preconsultation', 
-  'draft',
   'submitted',
   'first_reading',
   'committee',
@@ -46,6 +44,9 @@ const statusOrder = [
   'presidential',
   'published',
 ]
+
+// Etapy przygotowawcze (pokazywane tylko jeśli istnieją)
+const preparatoryStages = ['co_creation', 'preconsultation', 'draft']
 
 const stageConfig: Record<string, { name: string; description: string; icon: any }> = {
   co_creation: {
@@ -117,10 +118,21 @@ export function LegislativeTimeline({
   consultationStartDate,
   consultationEndDate,
 }: LegislativeTimelineProps) {
-  const currentStatusIndex = statusOrder.indexOf(billStatus)
   const isRejected = billStatus === 'rejected'
+  
+  // Określ które etapy przygotowawcze pokazać (tylko te które faktycznie wystąpiły)
+  const activePreparatoryStages = preparatoryStages.filter(stage => {
+    if (stage === 'preconsultation' && consultationStartDate) return true
+    if (stage === billStatus) return true
+    // Sprawdź czy jest event dla tego etapu
+    return events.some(e => e.event_type.toLowerCase().includes(stage))
+  })
 
-  const stages: LegislativeStage[] = statusOrder.map((status, index) => {
+  // Łączymy etapy przygotowawcze z formalnymi
+  const allStages = [...activePreparatoryStages, ...statusOrder]
+  const currentStatusIndex = allStages.indexOf(billStatus)
+
+  const stages: LegislativeStage[] = allStages.map((status, index) => {
     const config = stageConfig[status]
     const relatedEvent = events.find((e) => 
       e.event_type.toLowerCase().includes(status) || 
@@ -170,7 +182,7 @@ export function LegislativeTimeline({
           Ścieżka Legislacyjna
         </CardTitle>
         <CardDescription>
-          Wizualizacja procesu legislacyjnego od współtworzenia do publikacji
+          Szczegółowy przebieg procesu legislacyjnego w Sejmie, Senacie i u Prezydenta
         </CardDescription>
       </CardHeader>
       <CardContent>

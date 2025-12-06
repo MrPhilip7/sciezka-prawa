@@ -66,17 +66,19 @@ interface BillDetailContentProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string; step: number }> = {
-  co_creation: { label: 'Współtworzenie', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200', step: 0 },
-  preconsultation: { label: 'Prekonsultacje', color: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200', step: 1 },
-  draft: { label: 'Projekt', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', step: 2 },
-  submitted: { label: 'Złożony', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', step: 3 },
-  first_reading: { label: 'I Czytanie', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200', step: 4 },
-  committee: { label: 'Komisja', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', step: 5 },
-  second_reading: { label: 'II Czytanie', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', step: 6 },
-  third_reading: { label: 'III Czytanie', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', step: 7 },
-  senate: { label: 'Senat', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200', step: 8 },
-  presidential: { label: 'Prezydent', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200', step: 9 },
-  published: { label: 'Opublikowana', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', step: 10 },
+  // Etapy przygotowawcze (poza formalnym procesem Sejmu)
+  co_creation: { label: 'Współtworzenie', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200', step: -1 },
+  preconsultation: { label: 'Prekonsultacje', color: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200', step: -1 },
+  draft: { label: 'Projekt', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', step: -1 },
+  // Formalny proces legislacyjny (zgodny z legislativeSteps)
+  submitted: { label: 'Złożony', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', step: 1 },
+  first_reading: { label: 'I Czytanie', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200', step: 2 },
+  committee: { label: 'Komisja', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', step: 3 },
+  second_reading: { label: 'II Czytanie', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', step: 4 },
+  third_reading: { label: 'III Czytanie', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', step: 5 },
+  senate: { label: 'Senat', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200', step: 6 },
+  presidential: { label: 'Prezydent', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200', step: 7 },
+  published: { label: 'Opublikowana', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', step: 8 },
   rejected: { label: 'Odrzucona', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', step: -1 },
 }
 
@@ -136,42 +138,17 @@ function getCurrentDetailedStatus(events: BillEvent[]): string | null {
   return null
 }
 
-// Określ aktualny etap na podstawie wydarzeń
-function getCurrentStep(events: BillEvent[], status: string): number {
-  let maxStep = -1
-  
-  // Najpierw sprawdź status
-  const statusStep = statusConfig[status]?.step ?? 0
+// Określ aktualny etap na podstawie statusu (status z bazy jest źródłem prawdy)
+function getCurrentStep(status: string): number {
+  // Status z bazy określa aktualny etap - konwertuj step (1-8) na index (0-7)
+  const statusStep = statusConfig[status]?.step ?? -1
   if (statusStep > 0) {
-    maxStep = statusStep - 1 // konwertuj na index
+    return statusStep - 1 // konwertuj step na index w legislativeSteps
   }
   
-  // Potem sprawdź wydarzenia - sortuj chronologicznie i analizuj
-  const sortedEvents = [...events].sort((a, b) => 
-    new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
-  )
-  
-  for (const event of sortedEvents) {
-    const eventText = `${event.event_type} ${event.description || ''}`.toLowerCase()
-    
-    // Specjalna logika dla pracy w komisjach po II czytaniu - oznacza że II czytanie jest ukończone
-    if (eventText.includes('praca w komisjach po ii czytaniu') || 
-        eventText.includes('komisjach po ii czytaniu')) {
-      maxStep = Math.max(maxStep, 4) // second_reading ukończone, między II a III
-      continue
-    }
-    
-    for (let i = 0; i < legislativeSteps.length; i++) {
-      const stepKey = legislativeSteps[i].key
-      const patterns = eventToStepMap[stepKey] || []
-      
-      if (patterns.some(p => eventText.includes(p))) {
-        if (i > maxStep) maxStep = i
-      }
-    }
-  }
-  
-  return Math.max(0, maxStep)
+  // Etapy przygotowawcze (co_creation, preconsultation, draft) mają step = -1
+  // Zwróć -1 (przed pierwszym etapem formalnym)
+  return -1
 }
 
 export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isLoggedIn }: BillDetailContentProps) {
@@ -183,7 +160,7 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
   const [votingsLoaded, setVotingsLoaded] = useState(false)
   
   const status = statusConfig[bill.status] || statusConfig.draft
-  const currentStep = getCurrentStep(events, bill.status)
+  const currentStep = getCurrentStep(bill.status)
   const detailedStatus = getCurrentDetailedStatus(events)
   const isRejected = bill.status === 'rejected'
   const isPublished = bill.status === 'published'
@@ -331,7 +308,7 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
       {/* Progress Steps - prosty układ ze strzałkami */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Postęp legislacyjny</CardTitle>
+          <CardTitle className="text-lg">Aktualny etap</CardTitle>
           {isRejected && (
             <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2 mt-1">
               <XCircle className="h-4 w-4" />
@@ -438,13 +415,13 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
       }}>
         <TabsList>
           <TabsTrigger value="details">Szczegóły</TabsTrigger>
+          <TabsTrigger value="simple-language" className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-100 data-[state=active]:to-indigo-100 dark:data-[state=active]:from-blue-900 dark:data-[state=active]:to-indigo-900 font-semibold">✨ Prosty Język</TabsTrigger>
           <TabsTrigger value="legislative-path">Ścieżka Legislacyjna</TabsTrigger>
-          <TabsTrigger value="timeline">Historia ({events.length})</TabsTrigger>
-          <TabsTrigger value="simple-language">Prosty Język</TabsTrigger>
           <TabsTrigger value="votings" className="gap-1.5">
             <Vote className="h-4 w-4" />
             Głosowania
           </TabsTrigger>
+          <TabsTrigger value="timeline">Historia ({events.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="space-y-6">

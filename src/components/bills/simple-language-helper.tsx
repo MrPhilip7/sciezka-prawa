@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -50,8 +50,33 @@ const modeConfig: Record<Mode, {
 
 export function SimpleLanguageHelper({ text, title }: SimpleLangaugeHelperProps) {
   const [activeMode, setActiveMode] = useState<Mode>('simple')
-  const [results, setResults] = useState<Partial<Record<Mode, string>>>({})
+  const hasInitialized = useRef(false)
+  
+  // Generuj unikalny klucz cache na podstawie tekstu
+  const cacheKey = `simple-lang-${text.substring(0, 100)}`
+  
+  // Załaduj cache z localStorage
+  const [results, setResults] = useState<Partial<Record<Mode, string>>>(() => {
+    if (typeof window === 'undefined') return {}
+    try {
+      const cached = localStorage.getItem(cacheKey)
+      return cached ? JSON.parse(cached) : {}
+    } catch {
+      return {}
+    }
+  })
   const [loading, setLoading] = useState<Partial<Record<Mode, boolean>>>({})
+
+  // Zapisz wyniki do localStorage gdy się zmieniają
+  useEffect(() => {
+    if (Object.keys(results).length > 0) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(results))
+      } catch (error) {
+        console.error('Failed to cache results:', error)
+      }
+    }
+  }, [results, cacheKey])
 
   // Konfiguracja marked
   useEffect(() => {
@@ -63,7 +88,8 @@ export function SimpleLanguageHelper({ text, title }: SimpleLangaugeHelperProps)
 
   // Automatycznie przetwórz tekst dla domyślnego trybu przy pierwszym załadowaniu
   useEffect(() => {
-    if (!results[activeMode] && !loading[activeMode]) {
+    if (!hasInitialized.current && !results[activeMode] && !loading[activeMode]) {
+      hasInitialized.current = true
       processText(activeMode)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
