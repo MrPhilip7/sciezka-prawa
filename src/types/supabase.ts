@@ -15,7 +15,7 @@ export type Database = {
           sejm_id: string
           title: string
           description: string | null
-          status: 'co_creation' | 'preconsultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
+          status: 'co_creation' | 'preconsultation' | 'consultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
           ministry: string | null
           submission_date: string | null
           last_updated: string
@@ -45,7 +45,7 @@ export type Database = {
           sejm_id: string
           title: string
           description?: string | null
-          status?: 'co_creation' | 'preconsultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
+          status?: 'co_creation' | 'preconsultation' | 'consultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
           ministry?: string | null
           submission_date?: string | null
           last_updated?: string
@@ -70,7 +70,7 @@ export type Database = {
           sejm_id?: string
           title?: string
           description?: string | null
-          status?: 'co_creation' | 'preconsultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
+          status?: 'co_creation' | 'preconsultation' | 'consultation' | 'draft' | 'submitted' | 'first_reading' | 'committee' | 'second_reading' | 'third_reading' | 'senate' | 'presidential' | 'published' | 'rejected'
           ministry?: string | null
           submission_date?: string | null
           last_updated?: string

@@ -45,13 +45,6 @@ const publicNavigation = [
     requiresAuth: false,
   },
   {
-    name: 'Konsultacje',
-    href: '/consultations',
-    icon: MessageSquare,
-    badge: 'Nowy',
-    requiresAuth: false,
-  },
-  {
     name: 'Kalendarz',
     href: '/calendar',
     icon: Calendar,
@@ -66,6 +59,13 @@ const authRequiredNavigation = [
     href: '/search',
     icon: Search,
     badge: 'AI',
+    requiresAuth: true,
+  },
+  {
+    name: 'Konsultacje',
+    href: '/consultations',
+    icon: MessageSquare,
+    badge: 'Nowy',
     requiresAuth: true,
   },
   {

@@ -55,6 +55,9 @@ interface BillsContentProps {
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
+  co_creation: { label: 'Współtworzenie', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200' },
+  preconsultation: { label: 'Prekonsultacje', color: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200' },
+  consultation: { label: 'Konsultacje', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
   draft: { label: 'Projekt', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
   submitted: { label: 'Złożony', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
   first_reading: { label: 'I Czytanie', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200' },
@@ -69,6 +72,9 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 const statusOptions = [
   { value: 'all', label: 'Wszystkie statusy' },
+  { value: 'consultation', label: '💬 Trwają konsultacje', highlight: true },
+  { value: 'preconsultation', label: '✋ Prekonsultacje', highlight: true },
+  { value: 'co_creation', label: '🤝 Współtworzenie', highlight: true },
   { value: 'draft', label: 'Projekt' },
   { value: 'submitted', label: 'Złożony' },
   { value: 'first_reading', label: 'I Czytanie' },
@@ -190,6 +196,34 @@ export function BillsContent({ bills, totalCount, currentPage, years, tags, filt
         <p className="text-muted-foreground">
           Przeglądaj i wyszukuj projekty ustaw w procesie legislacyjnym
         </p>
+      </div>
+
+      {/* Quick Filters - Konsultacje */}
+      <div className="flex flex-wrap gap-3">
+        <Button
+          variant={filters.status === 'consultation' ? 'default' : 'outline'}
+          onClick={() => updateFilters({ status: filters.status === 'consultation' ? 'all' : 'consultation' })}
+          className="gap-2"
+        >
+          💬 Trwają konsultacje
+          {filters.status === 'consultation' && <X className="h-3 w-3" />}
+        </Button>
+        <Button
+          variant={filters.status === 'preconsultation' ? 'default' : 'outline'}
+          onClick={() => updateFilters({ status: filters.status === 'preconsultation' ? 'all' : 'preconsultation' })}
+          className="gap-2"
+        >
+          ✋ Prekonsultacje
+          {filters.status === 'preconsultation' && <X className="h-3 w-3" />}
+        </Button>
+        <Button
+          variant={filters.status === 'co_creation' ? 'default' : 'outline'}
+          onClick={() => updateFilters({ status: filters.status === 'co_creation' ? 'all' : 'co_creation' })}
+          className="gap-2"
+        >
+          🤝 Współtworzenie
+          {filters.status === 'co_creation' && <X className="h-3 w-3" />}
+        </Button>
       </div>
 
       {/* Filters */}

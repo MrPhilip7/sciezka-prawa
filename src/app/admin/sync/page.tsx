@@ -93,6 +93,47 @@ export default function SyncPage() {
     }
   }, [addLog])
 
+  const syncRCL = useCallback(async () => {
+    setIsSyncing(true)
+    setLogs([])
+    setResult(null)
+
+    try {
+      addLog('🔄 Rozpoczynam synchronizację z RCL (Rządowe Centrum Legislacji)...')
+      
+      const response = await fetch('/api/admin/sync-rcl-enhanced', {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setResult(data)
+      setLastSyncTime(new Date())
+      
+      if (data.success) {
+        addLog(`✅ Synchronizacja RCL zakończona pomyślnie`)
+        addLog(`📥 Znaleziono: ${data.total || 0} projektów`)
+        addLog(`📊 Dodano: ${data.inserted || 0} nowych`)
+        addLog(`🔄 Zaktualizowano: ${data.updated || 0}`)
+        addLog(`📝 Konsultacje: ${data.consultations || 0}`)
+        toast.success('Dane RCL zostały zsynchronizowane')
+      } else {
+        addLog(`❌ Błąd: ${data.message}`)
+        toast.error(data.message)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Nieznany błąd'
+      addLog(`❌ Błąd synchronizacji RCL: ${message}`)
+      setResult({ success: false, message })
+      toast.error('Błąd synchronizacji RCL')
+    } finally {
+      setIsSyncing(false)
+    }
+  }, [addLog])
+
   // Load settings from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -163,7 +204,7 @@ export default function SyncPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <Button 
                 onClick={() => syncData(false)} 
                 disabled={isSyncing}
@@ -178,7 +219,27 @@ export default function SyncPage() {
                 ) : (
                   <>
                     <RefreshCw className="h-4 w-4" />
-                    Synchronizuj dane
+                    Synchronizuj Sejm
+                  </>
+                )}
+              </Button>
+
+              <Button 
+                onClick={syncRCL} 
+                disabled={isSyncing}
+                size="lg"
+                variant="outline"
+                className="gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900 dark:hover:to-indigo-900 border-blue-200 dark:border-blue-800"
+              >
+                {isSyncing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Synchronizuję...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Synchronizuj RCL
                   </>
                 )}
               </Button>
