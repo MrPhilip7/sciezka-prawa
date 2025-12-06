@@ -29,6 +29,11 @@ function LoginForm() {
     }
   }
 
+  async function handleGoogleSignIn() {
+    setIsLoading(true)
+    await signInWithGoogle()
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4">
       <Card className="w-full max-w-md">
@@ -100,7 +105,7 @@ function LoginForm() {
               </div>
             </div>
             
-            <form action={signInWithGoogle} className="w-full">
+            <form action={handleGoogleSignIn} className="w-full">
               <Button type="submit" variant="outline" className="w-full" disabled={isLoading}>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path

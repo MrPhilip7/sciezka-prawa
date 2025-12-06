@@ -153,8 +153,18 @@ export async function parseImpactAssessment(url: string): Promise<ImpactAssessme
  */
 async function parsePDFImpactAssessment(url: string, response: Response): Promise<ImpactAssessment | null> {
   try {
-    // Import pdf-parse dynamically (only on server)
-    const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default
+    // Try to import pdf-parse dynamically (only available if installed)
+    let pdfParse: any
+    try {
+      pdfParse = await import('pdf-parse')
+      // Handle both CommonJS and ESM exports
+      if (typeof pdfParse !== 'function') {
+        pdfParse = (pdfParse as any).default || pdfParse
+      }
+    } catch {
+      console.warn('pdf-parse not available, falling back to basic parsing')
+      return null
+    }
     
     const buffer = await response.arrayBuffer()
     const data = await pdfParse(Buffer.from(buffer))

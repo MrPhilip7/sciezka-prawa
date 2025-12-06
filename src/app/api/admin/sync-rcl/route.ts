@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       // Try to find matching bill by title similarity
       const { data: bills } = await supabase
         .from('bills')
-        .select('id, title, sejm_id')
+        .select('id, title, sejm_id, ministry')
         .limit(100)
 
       if (!bills) continue
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
                   event_type: 'impact_assessment',
                   event_date: new Date().toISOString(),
                   description: impact.summary,
-                  details: impact,
+                  details: impact as unknown as Record<string, any>,
                 })
             }
           }

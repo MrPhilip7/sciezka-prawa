@@ -3,6 +3,7 @@ import { parseImpactAssessment } from '@/lib/api/rcl'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs' // Required for pdf-parse which uses native Node.js modules
 
 /**
  * Parse Impact Assessment (OSR) document
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
           event_type: 'impact_assessment',
           event_date: new Date().toISOString(),
           description: impact.summary || 'Ocena Skutków Regulacji',
-          details: impact,
+          details: impact as unknown as Record<string, any>,
         })
 
       if (eventError) {
