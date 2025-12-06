@@ -144,10 +144,6 @@ export function SimpleLanguageHelper({ text, title }: SimpleLangaugeHelperProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5" />
-          Pomoc w Zrozumieniu
-        </CardTitle>
         <CardDescription>
           {title ? `Analiza: ${title}` : 'AI pomoże Ci zrozumieć ten dokument prawny'}
         </CardDescription>
@@ -182,14 +178,6 @@ export function SimpleLanguageHelper({ text, title }: SimpleLangaugeHelperProps)
             return (
               <TabsContent key={mode} value={mode} className="mt-4">
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3 p-4 rounded-lg border bg-muted/30">
-                    <Icon className={cn("h-5 w-5 mt-0.5 shrink-0", config.color)} />
-                    <div>
-                      <h3 className="font-semibold">{config.label}</h3>
-                      <p className="text-sm text-muted-foreground">{config.description}</p>
-                    </div>
-                  </div>
-
                   {!result && !isLoading && (
                     <div className="text-center py-8">
                       <Button onClick={() => processText(mode)}>

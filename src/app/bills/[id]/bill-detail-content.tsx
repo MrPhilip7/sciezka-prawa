@@ -31,6 +31,7 @@ import type { Bill, BillEvent } from '@/types/supabase'
 import { toast } from 'sonner'
 import { LegislativeTimeline } from '@/components/bills/legislative-timeline'
 import { SimpleLanguageHelper } from '@/components/bills/simple-language-helper'
+import { ImpactAssessmentViewer } from '@/components/bills/impact-assessment-viewer'
 
 // Types for voting data
 interface ClubVotingStats {
@@ -63,6 +64,7 @@ interface BillDetailContentProps {
   events: BillEvent[]
   hasAlert: boolean
   isLoggedIn: boolean
+  impactAssessment?: any
 }
 
 const statusConfig: Record<string, { label: string; color: string; step: number }> = {
@@ -151,7 +153,7 @@ function getCurrentStep(status: string): number {
   return -1
 }
 
-export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isLoggedIn }: BillDetailContentProps) {
+export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isLoggedIn, impactAssessment }: BillDetailContentProps) {
   const router = useRouter()
   const [hasAlert, setHasAlert] = useState(initialHasAlert)
   const [isTogglingAlert, setIsTogglingAlert] = useState(false)
@@ -416,6 +418,9 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
         <TabsList>
           <TabsTrigger value="details">Szczegóły</TabsTrigger>
           <TabsTrigger value="simple-language" className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-100 data-[state=active]:to-indigo-100 dark:data-[state=active]:from-blue-900 dark:data-[state=active]:to-indigo-900 font-semibold">✨ Prosty Język</TabsTrigger>
+          {(impactAssessment || bill.impact_assessment_url) && (
+            <TabsTrigger value="impact">Ocena Skutków (OSR)</TabsTrigger>
+          )}
           <TabsTrigger value="legislative-path">Ścieżka Legislacyjna</TabsTrigger>
           <TabsTrigger value="votings" className="gap-1.5">
             <Vote className="h-4 w-4" />
@@ -506,6 +511,13 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
           </Card>
         </TabsContent>
 
+        <TabsContent value="simple-language">
+          <SimpleLanguageHelper
+            text={bill.description || bill.title}
+            title={bill.title}
+          />
+        </TabsContent>
+
         <TabsContent value="legislative-path">
           <LegislativeTimeline
             billStatus={bill.status}
@@ -556,13 +568,6 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="simple-language">
-          <SimpleLanguageHelper
-            text={bill.description || bill.title}
-            title={bill.title}
-          />
         </TabsContent>
 
         <TabsContent value="votings">
@@ -683,6 +688,64 @@ export function BillDetailContent({ bill, events, hasAlert: initialHasAlert, isL
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Impact Assessment (OSR) Tab */}
+        {(impactAssessment || bill.impact_assessment_url) && (
+          <TabsContent value="impact" className="space-y-6">
+            <ImpactAssessmentViewer 
+              data={{
+                url: bill.impact_assessment_url || undefined,
+                summary: impactAssessment?.summary,
+                financialImpact: impactAssessment?.financialImpact,
+                socialImpact: impactAssessment?.socialImpact,
+                economicImpact: impactAssessment?.economicImpact,
+                environmentalImpact: impactAssessment?.environmentalImpact,
+                legalImpact: impactAssessment?.legalImpact,
+              }}
+              billTitle={bill.title}
+            />
+            
+            {/* RCL Consultations Info */}
+            {(bill.consultation_start_date || bill.consultation_url) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Konsultacje społeczne</CardTitle>
+                  <CardDescription>
+                    Etap prekonsultacji i konsultacji społecznych
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {bill.consultation_start_date && bill.consultation_end_date && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span>
+                        {format(new Date(bill.consultation_start_date), 'd MMMM yyyy', { locale: pl })}
+                        {' - '}
+                        {format(new Date(bill.consultation_end_date), 'd MMMM yyyy', { locale: pl })}
+                      </span>
+                    </div>
+                  )}
+                  {bill.consultation_url && (
+                    <a
+                      href={bill.consultation_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Zobacz konsultacje na RCL
+                    </a>
+                  )}
+                  {bill.rcl_id && (
+                    <p className="text-sm text-muted-foreground">
+                      Identyfikator RCL: <code className="bg-muted px-1 py-0.5 rounded">{bill.rcl_id}</code>
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )

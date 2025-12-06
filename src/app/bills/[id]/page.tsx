@@ -15,10 +15,18 @@ export default async function BillDetailPage({ params }: BillDetailPageProps) {
   
   const { data: { user } } = await supabase.auth.getUser()
   
-  // Fetch bill details
+  // Fetch bill details with all new fields
   const { data: bill, error } = await supabase
     .from('bills')
-    .select('*')
+    .select(`
+      *,
+      rcl_id,
+      consultation_start_date,
+      consultation_end_date,
+      consultation_url,
+      impact_assessment_url,
+      simple_language_summary
+    `)
     .eq('id', id)
     .single()
 
@@ -26,12 +34,16 @@ export default async function BillDetailPage({ params }: BillDetailPageProps) {
     notFound()
   }
 
-  // Fetch bill events for timeline
+  // Fetch bill events for timeline (including OSR data)
   const { data: events } = await supabase
     .from('bill_events')
     .select('*')
     .eq('bill_id', id)
     .order('event_date', { ascending: true })
+  
+  // Extract impact assessment from events if available
+  const impactEvent = events?.find(e => e.event_type === 'impact_assessment')
+  const impactData = impactEvent?.details || null
 
   // Check if user has an alert for this bill
   let hasAlert = false
@@ -49,10 +61,11 @@ export default async function BillDetailPage({ params }: BillDetailPageProps) {
   return (
     <DashboardLayout user={user}>
       <BillDetailContent 
-        bill={bill}
-        events={events || []}
+        bill={bill} 
+        events={events || []} 
         hasAlert={hasAlert}
         isLoggedIn={!!user}
+        impactAssessment={impactData}
       />
     </DashboardLayout>
   )
