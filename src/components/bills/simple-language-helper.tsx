@@ -55,12 +55,22 @@ export function SimpleLanguageHelper({ text, title }: SimpleLangaugeHelperProps)
   // Generuj unikalny klucz cache na podstawie tekstu
   const cacheKey = `simple-lang-${text.substring(0, 100)}`
   
-  // Załaduj cache z localStorage
+  // Załaduj cache z localStorage (usuń stare cache z błędami)
   const [results, setResults] = useState<Partial<Record<Mode, string>>>(() => {
     if (typeof window === 'undefined') return {}
     try {
       const cached = localStorage.getItem(cacheKey)
-      return cached ? JSON.parse(cached) : {}
+      if (!cached) return {}
+      
+      const parsedCache = JSON.parse(cached)
+      // Wyczyść cache jeśli zawiera błędy
+      const cleanedCache: Partial<Record<Mode, string>> = {}
+      Object.entries(parsedCache).forEach(([key, value]) => {
+        if (typeof value === 'string' && !value.includes('Wystąpił błąd') && !value.includes('nie udało się')) {
+          cleanedCache[key as Mode] = value
+        }
+      })
+      return cleanedCache
     } catch {
       return {}
     }
@@ -114,17 +124,23 @@ export function SimpleLanguageHelper({ text, title }: SimpleLangaugeHelperProps)
       
       if (data.response) {
         setResults(prev => ({ ...prev, [mode]: data.response }))
+      } else if (data.error) {
+        // Show API error details
+        setResults(prev => ({ 
+          ...prev, 
+          [mode]: `⚠️ **Błąd API**: ${data.error}\n\n${data.details || 'Spróbuj ponownie później.'}` 
+        }))
       } else {
         setResults(prev => ({ 
           ...prev, 
-          [mode]: 'Przepraszam, nie udało się przetworzyć tekstu. Spróbuj ponownie.' 
+          [mode]: '❌ Przepraszam, nie udało się przetworzyć tekstu. Spróbuj ponownie.' 
         }))
       }
     } catch (error) {
       console.error(`Error processing ${mode}:`, error)
       setResults(prev => ({ 
         ...prev, 
-        [mode]: 'Wystąpił błąd podczas przetwarzania. Spróbuj ponownie później.' 
+        [mode]: '❌ **Błąd połączenia**\n\nWystąpił problem podczas komunikacji z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.' 
       }))
     } finally {
       setLoading(prev => ({ ...prev, [mode]: false }))
@@ -199,11 +215,29 @@ export function SimpleLanguageHelper({ text, title }: SimpleLangaugeHelperProps)
                   )}
 
                   {result && (
-                    <div className="prose prose-sm dark:prose-invert max-w-none markdown-content">
-                      <div 
-                        className="rounded-lg border bg-card p-6"
-                        dangerouslySetInnerHTML={{ __html: marked.parse(result) }}
-                      />
+                    <div className="space-y-3">
+                      <div className="prose prose-sm dark:prose-invert max-w-none markdown-content">
+                        <div 
+                          className="rounded-lg border bg-card p-6"
+                          dangerouslySetInnerHTML={{ __html: marked.parse(result) }}
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            setResults(prev => {
+                              const newResults = { ...prev }
+                              delete newResults[mode]
+                              return newResults
+                            })
+                            processText(mode)
+                          }}
+                        >
+                          🔄 Spróbuj ponownie
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>

@@ -91,6 +91,7 @@ Wyjaśnij poniższy tekst:`
     }
 
     if (!apiKey) {
+      console.log('[Simple Language API] No API key configured')
       // Fallback bez API - podstawowa analiza
       let response = ''
       
@@ -112,6 +113,7 @@ Wyjaśnij poniższy tekst:`
     }
 
     // Użyj Gemini API - używamy gemini-flash-latest
+    console.log('[Simple Language API] API Key present:', apiKey.substring(0, 10) + '...')
     console.log('[Simple Language API] Processing with mode:', mode, 'Text length:', text.length)
     
     const apiResponse = await fetch(
@@ -161,6 +163,25 @@ Wyjaśnij poniższy tekst:`
     if (!apiResponse.ok) {
       const errorText = await apiResponse.text()
       console.error('[Simple Language API] Gemini API error:', apiResponse.status, errorText)
+      
+      // Handle quota exceeded error
+      if (apiResponse.status === 429) {
+        const errorData = JSON.parse(errorText)
+        const retryDelay = errorData.error?.details?.find((d: { '@type': string }) => 
+          d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo'
+        )?.retryDelay
+        
+        return NextResponse.json({ 
+          response: `⏳ **Limit zapytań API został przekroczony**\n\n` +
+                   `Funkcja "Prosty Język" korzysta z darmowego API Google Gemini, które ma limit 20 zapytań dziennie.\n\n` +
+                   `**Co możesz zrobić:**\n` +
+                   `• Spróbuj ponownie ${retryDelay ? `za ${retryDelay}` : 'później'}\n` +
+                   `• Użyj zakładki "Streszczenie" aby zobaczyć podstawowe informacje\n` +
+                   `• Przeczytaj oryginalny tekst w zakładce "Szczegóły"\n\n` +
+                   `_Administrator może rozważyć upgrade planu API dla większego limitu._`
+        })
+      }
+      
       throw new Error(`Gemini API error: ${apiResponse.status} - ${errorText}`)
     }
 
