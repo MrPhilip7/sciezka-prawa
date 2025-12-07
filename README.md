@@ -18,7 +18,6 @@
 - **Alerts System** - Powiadomienia email o zmianach w śledzonych projektach
 - **User Profiles** - Personalizowane konto z zapisanymi wyszukiwaniami
 
-### ✨ NOWE w Fazie 2 (Grudzień 2024) - Integracja RCL
 - **🔗 Integracja RCL** - Automatyczne łączenie danych z Rządowego Centrum Legislacji
 - **📋 Strona Konsultacji** - Dedykowany widok `/consultations` z aktywnymi konsultacjami i prekonsultacjami
 - **🔔 Ulepszone Alerty** - Konfigurowalny system powiadomień (email/push) dla konkretnych ustaw
@@ -27,7 +26,7 @@
 - **📅 Monitoring Konsultacji** - Śledzenie aktywnych, nadchodzących i zakończonych konsultacji społecznych
 - **🎯 Impact Analysis** - Szczegółowa analiza przewidywanych skutków regulacji
 
-### ✨ Faza 1 (6 grudnia 2025)
+
 - **📊 Wizualizacja Ścieżki Legislacyjnej** - Graficzny timeline procesu od współtworzenia do publikacji
 - **🗣️ Prosty Język** - AI tłumaczy skomplikowane teksty prawne na zrozumiały język
 - **📈 Analiza Skutków** - Pokazuje jak ustawa wpłynie na obywateli, firmy i budżet
@@ -566,6 +565,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<p align="center">
-  Made with ❤️ for transparency in Polish legislation
-</p>
+
