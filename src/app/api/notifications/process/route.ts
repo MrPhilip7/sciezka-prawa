@@ -5,10 +5,16 @@ import { sendEmail, generateBillChangeEmail, generateDigestEmail, BillChangeNoti
 export const dynamic = 'force-dynamic'
 
 // Use service role for cron jobs
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!url || !key) {
+    throw new Error('Supabase URL or Service Role Key is not configured')
+  }
+  
+  return createClient(url, key)
+}
 
 interface UserAlert {
   id: string
@@ -46,6 +52,8 @@ interface BillChange {
  */
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
+    
     // Verify cron secret
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET

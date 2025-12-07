@@ -4,28 +4,39 @@ import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
 
-// Initialize clients
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Initialize clients lazily
+function getSupabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!url || !key) {
+    throw new Error('Supabase URL or Service Role Key is not configured')
+  }
+  
+  return createClient(url, key)
+}
+
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not configured')
+  }
+  return new Resend(apiKey)
+}
 
 /**
  * POST /api/notifications/send-report - Send personalized report based on user's alerts
  */
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
+    const resend = getResendClient()
     const body = await request.json()
     const { email, secret } = body
 
     // Simple secret verification
     if (secret !== process.env.CRON_SECRET && secret !== 'test-sciezka-prawa-2024') {
       return NextResponse.json({ error: 'Invalid secret' }, { status: 401 })
-    }
-
-    const apiKey = process.env.RESEND_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: 'RESEND_API_KEY not configured' }, { status: 500 })
     }
 
     // Find user by email
@@ -285,8 +296,6 @@ export async function POST(request: NextRequest) {
     `
 
     // Send email
-    const resend = new Resend(apiKey)
-    
     const { data, error } = await resend.emails.send({
       from: 'Ścieżka Prawa <onboarding@resend.dev>',
       to: [email],

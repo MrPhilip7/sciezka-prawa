@@ -1,7 +1,13 @@
 import { Resend } from 'resend'
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend client lazily
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not configured')
+  }
+  return new Resend(apiKey)
+}
 
 export interface EmailOptions {
   to: string | string[]
@@ -37,6 +43,7 @@ export interface DigestReport {
  */
 export async function sendEmail(options: EmailOptions): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
+    const resend = getResendClient()
     const { data, error } = await resend.emails.send({
       from: options.from || 'Ścieżka Prawa <noreply@sciezkaprawa.pl>',
       to: Array.isArray(options.to) ? options.to : [options.to],
@@ -351,4 +358,4 @@ export function generateTestEmail(userName: string): string {
   `
 }
 
-export { resend }
+export { getResendClient }
