@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, addMonths, subMonths, parseISO } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, addMonths, subMonths } from 'date-fns'
 import { pl } from 'date-fns/locale'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Video, 
   Building2, 
   Users, 
   ExternalLink,
@@ -327,23 +326,55 @@ export function CalendarContent() {
               </div>
             ) : (
               /* List view - events grouped by day for current month */
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-4">
+              <ScrollArea className="h-[560px]">
+                <div className="space-y-6 pr-3">
                   {monthEvents.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
                       Brak wydarzeń w tym miesiącu
                     </p>
                   ) : (
-                    monthEvents.map(([dateStr, dayEvents]) => (
-                      <div key={dateStr} className="space-y-2">
-                        <h4 className="text-sm font-medium text-muted-foreground border-b pb-1 sticky top-0 bg-background">
-                          {format(new Date(dateStr), 'EEEE, d MMMM', { locale: pl })}
-                        </h4>
-                        {dayEvents.map(event => (
-                          <EventCard key={event.id} event={event} compact />
-                        ))}
-                      </div>
-                    ))
+                    monthEvents.map(([dateStr, dayEvents]) => {
+                      const dateObj = new Date(dateStr)
+                      const dayIsToday = isToday(dateObj)
+                      return (
+                        <div key={dateStr}>
+                          {/* Date header */}
+                          <div className={cn(
+                            'flex items-center gap-3 mb-3 pb-2 border-b sticky top-0 z-10',
+                            dayIsToday ? 'border-primary/50' : 'border-border'
+                          )}>
+                            <div className={cn(
+                              'flex flex-col items-center justify-center w-12 h-12 rounded-lg text-center shrink-0',
+                              dayIsToday 
+                                ? 'bg-primary text-primary-foreground' 
+                                : 'bg-muted/50'
+                            )}>
+                              <span className="text-lg font-bold leading-none">{format(dateObj, 'd')}</span>
+                              <span className="text-[10px] uppercase leading-none mt-0.5">{format(dateObj, 'MMM', { locale: pl })}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={cn(
+                                'text-sm font-semibold capitalize',
+                                dayIsToday && 'text-primary'
+                              )}>
+                                {format(dateObj, 'EEEE', { locale: pl })}
+                                {dayIsToday && <span className="ml-2 text-xs font-normal text-primary">(dzisiaj)</span>}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {dayEvents.length} {dayEvents.length === 1 ? 'wydarzenie' : dayEvents.length < 5 ? 'wydarzenia' : 'wydarzeń'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Events for that day */}
+                          <div className="space-y-2 ml-1">
+                            {dayEvents.map(event => (
+                              <ListEventCard key={event.id} event={event} />
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })
                   )}
                 </div>
               </ScrollArea>
@@ -503,17 +534,13 @@ export function CalendarContent() {
   )
 }
 
-// Event Card Component
-function EventCard({ event, compact = false }: { event: CalendarEvent; compact?: boolean }) {
+// Event Card Component (sidebar / month view)
+function EventCard({ event }: { event: CalendarEvent }) {
   const config = typeConfig[event.type]
-  const statusCfg = statusConfig[event.status]
   const Icon = config.icon
   
   return (
-    <div className={cn(
-      'p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors',
-      compact && 'p-2'
-    )}>
+    <div className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
       <div className="flex items-start gap-3">
         <div className={cn('p-1.5 rounded', config.color, 'bg-opacity-20')}>
           <Icon className={cn('h-4 w-4', config.color.replace('bg-', 'text-'))} />
@@ -529,7 +556,7 @@ function EventCard({ event, compact = false }: { event: CalendarEvent; compact?:
             )}
           </div>
           
-          {!compact && event.description && (
+          {event.description && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
               {event.description}
             </p>
@@ -544,11 +571,7 @@ function EventCard({ event, compact = false }: { event: CalendarEvent; compact?:
               </span>
             )}
             
-            {compact && (
-              <span>{format(parseISO(event.date), 'd MMM', { locale: pl })}</span>
-            )}
-            
-            {event.location && !compact && (
+            {event.location && (
               <span className="flex items-center gap-1 truncate">
                 <MapPin className="h-3 w-3" />
                 {event.location}
@@ -566,6 +589,87 @@ function EventCard({ event, compact = false }: { event: CalendarEvent; compact?:
               <PlayCircle className="h-3 w-3" />
               {event.status === 'finished' ? 'Obejrzyj nagranie' : 'Oglądaj transmisję'}
               <ExternalLink className="h-3 w-3" />
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// List Event Card Component (list view - more detailed)
+function ListEventCard({ event }: { event: CalendarEvent }) {
+  const config = typeConfig[event.type]
+  const Icon = config.icon
+  
+  return (
+    <div className={cn(
+      'relative flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-all',
+      'border-l-[3px]',
+      event.type === 'sejm' && 'border-l-red-500',
+      event.type === 'senat' && 'border-l-blue-500',
+      event.type === 'committee' && 'border-l-purple-500',
+      event.status === 'live' && 'ring-1 ring-red-500/30 bg-red-500/5'
+    )}>
+      {/* Time column */}
+      <div className="flex flex-col items-center w-14 shrink-0 pt-0.5">
+        {event.startTime ? (
+          <>
+            <span className="text-sm font-semibold tabular-nums">{event.startTime}</span>
+            {event.endTime && (
+              <span className="text-[10px] text-muted-foreground tabular-nums">{event.endTime}</span>
+            )}
+          </>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start gap-2">
+          <h4 className="font-medium text-sm line-clamp-2 flex-1">{event.title}</h4>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {event.status === 'live' && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                <span className="animate-pulse mr-1">●</span> Na żywo
+              </Badge>
+            )}
+            <Badge variant="outline" className={cn(
+              'text-[10px] px-1.5 py-0 border-0',
+              event.type === 'sejm' && 'bg-red-500/10 text-red-600 dark:text-red-400',
+              event.type === 'senat' && 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+              event.type === 'committee' && 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+            )}>
+              <Icon className="h-3 w-3 mr-1" />
+              {config.label}
+            </Badge>
+          </div>
+        </div>
+
+        {event.description && (
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+            {event.description}
+          </p>
+        )}
+        
+        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+          {event.location && (
+            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate max-w-[200px]">{event.location}</span>
+            </span>
+          )}
+          
+          {event.videoUrl && (
+            <Link 
+              href={event.videoUrl} 
+              target="_blank"
+              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+            >
+              <PlayCircle className="h-3 w-3" />
+              {event.status === 'finished' ? 'Obejrzyj nagranie' : 'Oglądaj transmisję'}
+              <ExternalLink className="h-2.5 w-2.5" />
             </Link>
           )}
         </div>
