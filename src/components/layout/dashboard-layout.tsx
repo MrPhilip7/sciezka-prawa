@@ -23,14 +23,14 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
       <MobileNav isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
       {/* Main Content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 flex flex-col min-h-screen">
         <Header user={user} onMenuClick={() => setMobileNavOpen(true)} />
-        <main className="p-4 lg:p-6">
+        <main className="p-4 lg:p-6 flex-1">
           {children}
         </main>
         
         {/* Footer */}
-        <footer className="border-t bg-card mt-8 py-6">
+        <footer className="border-t bg-card py-6">
           <div className="container max-w-7xl mx-auto px-4 lg:px-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-sm text-muted-foreground">
