@@ -57,7 +57,7 @@ interface CalendarEvent {
   date: string
   startTime?: string
   endTime?: string
-  type: 'sejm' | 'senat' | 'committee' | 'bill'
+  type: 'sejm' | 'senat' | 'committee'
   description?: string
   location?: string
   videoUrl?: string
@@ -285,7 +285,7 @@ export async function GET(request: Request) {
           date,
           startTime: startTimeFromVideo || (date === firstDate ? '10:00' : '09:00'),
           type: 'sejm',
-          description: cleanAgenda || `Posiedzenie Sejmu RP X kadencji`,
+          description: cleanAgenda ? cleanAgenda.substring(0, 150) : `Posiedzenie Sejmu RP X kadencji`,
           location: matchedVideo?.room || 'Sala posiedzeń Sejmu, ul. Wiejska 4/6/8, Warszawa',
           videoUrl,
           archiveUrl: matchedVideo?.playerLink,
@@ -357,7 +357,7 @@ export async function GET(request: Request) {
       const dateCompare = a.date.localeCompare(b.date)
       if (dateCompare !== 0) return dateCompare
       // Sejm/Senat plenary first, then committees
-      const typeOrder = { sejm: 0, senat: 1, committee: 2, bill: 3 }
+      const typeOrder = { sejm: 0, senat: 1, committee: 2 }
       const typeCompare = typeOrder[a.type] - typeOrder[b.type]
       if (typeCompare !== 0) return typeCompare
       return (a.startTime || '').localeCompare(b.startTime || '')

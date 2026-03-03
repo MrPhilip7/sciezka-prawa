@@ -12,7 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Calendar as CalendarIcon, 
   Video, 
   Building2, 
   Users, 
@@ -33,7 +32,7 @@ interface CalendarEvent {
   date: string
   startTime?: string
   endTime?: string
-  type: 'sejm' | 'senat' | 'committee' | 'bill'
+  type: 'sejm' | 'senat' | 'committee'
   description?: string
   location?: string
   videoUrl?: string
@@ -55,7 +54,6 @@ const typeConfig = {
   sejm: { label: 'Sejm', color: 'bg-red-500', icon: Building2 },
   senat: { label: 'Senat', color: 'bg-blue-500', icon: Building2 },
   committee: { label: 'Komisja', color: 'bg-purple-500', icon: Users },
-  bill: { label: 'Ustawa', color: 'bg-green-500', icon: CalendarIcon },
 }
 
 const statusConfig = {
@@ -522,17 +520,17 @@ function EventCard({ event, compact = false }: { event: CalendarEvent; compact?:
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h4 className="font-medium text-sm truncate">{event.title}</h4>
+          <div className="flex items-start gap-2 flex-wrap">
+            <h4 className="font-medium text-sm line-clamp-2">{event.title}</h4>
             {event.status === 'live' && (
-              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 shrink-0">
                 <span className="animate-pulse mr-1">●</span> Na żywo
               </Badge>
             )}
           </div>
           
           {!compact && event.description && (
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
               {event.description}
             </p>
           )}
@@ -558,7 +556,7 @@ function EventCard({ event, compact = false }: { event: CalendarEvent; compact?:
             )}
           </div>
           
-          {/* Video link */}
+          {/* Video / detail link */}
           {event.videoUrl && (
             <Link 
               href={event.videoUrl} 
