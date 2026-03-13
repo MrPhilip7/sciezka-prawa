@@ -61,6 +61,10 @@ const statusConfig = {
   finished: { label: 'Zakończone', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
 }
 
+function isEventLiveToday(event: CalendarEvent) {
+  return event.status === 'live' && event.date === format(new Date(), 'yyyy-MM-dd')
+}
+
 export function CalendarContent() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -78,7 +82,7 @@ export function CalendarContent() {
   
   // Check for live events from API
   const liveEvents = useMemo(() => {
-    return events.filter(e => e.status === 'live')
+    return events.filter(isEventLiveToday)
   }, [events])
   
   // Show live section if YouTube is live OR API reports live events
@@ -269,7 +273,7 @@ export function CalendarContent() {
                   const dayEvents = getEventsForDate(day)
                   const isCurrentMonth = isSameMonth(day, currentDate)
                   const isSelected = selectedDate && isSameDay(day, selectedDate)
-                  const dayHasLiveEvent = dayEvents.some(e => e.status === 'live')
+                  const dayHasLiveEvent = dayEvents.some(isEventLiveToday)
                   // Show LIVE badge on today if YouTube is streaming
                   const hasLive = dayHasLiveEvent || (isToday(day) && youtubeLive?.isLive)
                   
@@ -309,7 +313,7 @@ export function CalendarContent() {
                             key={i}
                             className={cn(
                               'h-1.5 w-1.5 rounded-full',
-                              event.status === 'live' ? 'bg-red-500 animate-pulse' : typeConfig[event.type].color
+                              isEventLiveToday(event) ? 'bg-red-500 animate-pulse' : typeConfig[event.type].color
                             )}
                             title={event.title}
                           />
@@ -549,7 +553,7 @@ function EventCard({ event }: { event: CalendarEvent }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2 flex-wrap">
             <h4 className="font-medium text-sm line-clamp-2">{event.title}</h4>
-            {event.status === 'live' && (
+            {isEventLiveToday(event) && (
               <Badge variant="destructive" className="text-[10px] px-1.5 py-0 shrink-0">
                 <span className="animate-pulse mr-1">●</span> Na żywo
               </Badge>
@@ -609,7 +613,7 @@ function ListEventCard({ event }: { event: CalendarEvent }) {
       event.type === 'sejm' && 'border-l-red-500',
       event.type === 'senat' && 'border-l-blue-500',
       event.type === 'committee' && 'border-l-purple-500',
-      event.status === 'live' && 'ring-1 ring-red-500/30 bg-red-500/5'
+      isEventLiveToday(event) && 'ring-1 ring-red-500/30 bg-red-500/5'
     )}>
       {/* Time column */}
       <div className="flex flex-col items-center w-14 shrink-0 pt-0.5">
@@ -630,7 +634,7 @@ function ListEventCard({ event }: { event: CalendarEvent }) {
         <div className="flex items-start gap-2">
           <h4 className="font-medium text-sm line-clamp-2 flex-1">{event.title}</h4>
           <div className="flex items-center gap-1.5 shrink-0">
-            {event.status === 'live' && (
+            {isEventLiveToday(event) && (
               <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
                 <span className="animate-pulse mr-1">●</span> Na żywo
               </Badge>
